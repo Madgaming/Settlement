@@ -11,6 +11,7 @@ import org.bukkit.util.Vector;
 public class SettlementLocation extends Vector implements Externalizable {
 
 	protected World world;
+	protected float pitch, yaw;
 	
 	public SettlementLocation(World world, double x, double y, double z) {
 		super(x, y, z);

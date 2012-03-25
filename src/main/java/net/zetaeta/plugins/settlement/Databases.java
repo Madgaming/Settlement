@@ -1,61 +1,138 @@
 package net.zetaeta.plugins.settlement;
 
-import java.io.Externalizable;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Map;
-import java.util.Set;
-
-import org.bukkit.entity.Player;
+import java.util.logging.Level;
 
 public abstract class Databases {
 	public static File settlements;
 	public static File players;
-	public static SettlementPlugin plugin;
-	public static Map<Player, SettlementPlayer> allPlayers;
-	private static Set<SettlementPlayer> newPlayers;
-	private static ObjectInputStream settlementsInput = null;
-	private static ObjectInputStream playersInput = null;
+	public static SettlementPlugin plugin = SettlementPlugin.plugin;
 	
 	/**
 	 * Equivalent to constructor, handles loading everything
-	 * 
-	 * @param thePlugin Main plugin to be referenced
 	 * */
-	
-	protected static void initialize(SettlementPlugin thePlugin) {
-		plugin = thePlugin;
-		settlements = new File(plugin.getDataFolder(), "data" + File.pathSeparator + "settlements.dat");
-		try {
-			settlements.createNewFile();
-		} catch (IOException e) {
-			plugin.log.severe("ERROR: Could not make settlements file: " + e.toString() + " " + e.getMessage());
-			e.printStackTrace();
-		}
-		players = new File(plugin.getDataFolder(), "data" + File.pathSeparator + "players.dat");
-		try {
-			players.createNewFile();
-		} catch (IOException e) {
-			plugin.log.severe("ERROR: Could not make players file: " + e.toString() + " " + e.getMessage());
-			e.printStackTrace();
-		}
+	protected static void initialize() {
+		File dataFolder = new File(plugin.getDataFolder(), "data");
+		dataFolder.mkdirs();
+		settlements = new File(plugin.getDataFolder(), "data" + File.separator + "settlements");
+		settlements.mkdirs();
+		players = new File(plugin.getDataFolder(), "data" + File.separator + "players");
+		players.mkdirs();
 	}
 	
 	/**
 	 * Loads settlement and player info from their respective .dat files.
 	 * */
 	public static void loadDatabases() {
+		Thread playersLoader = new Thread(new Runnable() {
 
-		try {
+			@Override
+			public void run() {
+				File[] playersFiles = players.listFiles();
+				int playerCount = 0;
+				for (File playerFile : playersFiles) {
+					if (playerFile.getName().endsWith(".plr")) {
+						try {
+							loadPlayerFile(playerFile);
+							playerCount++;
+						} catch(IOException e) {
+							plugin.log.warning("An error occurred loading file " + playerFile.getName() + ":");
+							plugin.log.log(Level.WARNING, e.getMessage(), e);
+						}
+					}
+				}
+				plugin.log.info("Player files finished loading; " + playerCount + " players loaded!");
+			}
+			
+			
+			private void loadPlayerFile(File playerFile) throws IOException {
+				ObjectInputStream playerInput = null;
+				try {
+					playerInput = new ObjectInputStream(new FileInputStream(playerFile));
+				} catch (EOFException e) {
+					plugin.log.warning("Player file " + playerFile.getName() + " is empty!");
+					plugin.log.log(Level.WARNING, e.getMessage(), e);
+					return;
+				}
+				SettlementPlayer output;
+				try {
+					output = (SettlementPlayer) playerInput.readObject();
+					SettlementPlayer.loadPlayer(output);
+				} catch (EOFException e) {
+					
+				} catch (ClassNotFoundException e) {
+					plugin.log.log(Level.WARNING, e.getMessage(), e);
+				}
+			}
+			
+			
+		});
+		
+		
+		
+		Thread settlementsLoader = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				File[] settlementsFiles = settlements.listFiles();
+				int settlementCount = 0;
+				for (File settlementFile : settlementsFiles) {
+					if (settlementFile.getName().endsWith(".set")) {
+						try {
+							loadSettlementFile(settlementFile);
+							settlementCount++;
+						} catch(IOException e) {
+							plugin.log.warning("An error occurred loading file " + settlementFile.getName() + ":");
+							plugin.log.log(Level.WARNING, e.getMessage(), e);
+						}
+					}
+				}
+				plugin.log.info("Settlement files finished loading; " + settlementCount + " settlements loaded!");
+			}
+			
+			
+			private void loadSettlementFile(File settlementFile) throws IOException {
+				ObjectInputStream settlementInput = null;
+				try {
+					settlementInput = new ObjectInputStream(new FileInputStream(settlementFile));
+				} catch (EOFException e) {
+					plugin.log.warning("Settlement file " + settlementFile.getName() + " is empty!");
+					plugin.log.log(Level.WARNING, e.getMessage(), e);
+					return;
+				}
+				Settlement output;
+				try {
+					output = (Settlement) settlementInput.readObject();
+					Settlement.loadSettlement(output);
+				} catch (EOFException e) {
+					
+				} catch (ClassNotFoundException e) {
+					plugin.log.log(Level.WARNING, e.getMessage(), e);
+				}
+			}
+			
+			
+		});
+		
+		playersLoader.start();
+		settlementsLoader.start();
+		
+/*		try {
 			settlementsInput = new ObjectInputStream(new FileInputStream(settlements));
+		} catch (EOFException e) {
+			
 		} catch (IOException e) {
 			plugin.log.severe("An error occured while loading settlements file!");
 			e.printStackTrace();
 		}
 		try {
 			playersInput = new ObjectInputStream(new FileInputStream(settlements));
+		} catch (EOFException e) {
+			
 		} catch (IOException e) {
 			plugin.log.severe("An error occured while loading players file!");
 			e.printStackTrace();
@@ -65,32 +142,56 @@ public abstract class Databases {
 			@Override
 			public void run() {
 				SettlementPlayer output;
+				int playerCount = 0;
 				try {
 					while ((output = (SettlementPlayer) playersInput.readObject()) != null) {
 						loadPlayer(output);
+						playerCount++;
 					}
-				} catch (ClassNotFoundException | IOException e) {
+					plugin.log.info("Finished loading players!");
+				} catch (EOFException e) {
+					plugin.log.info("Finished loading players! " + playerCount + " players were loaded!");
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				
 			}
 			
 		});
-	}
-	
-	protected static void loadPlayer(SettlementPlayer output) {
-		allPlayers.put(plugin.getServer().getOfflinePlayer(output.getName()).getPlayer(), output);
 		
+		Thread readSettlements= new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				Settlement output;
+				int settlementCount = 0;
+				if (settlements.getTotalSpace() == 0)
+					return;
+				try {
+					while ((output = (Settlement) settlementsInput.readObject()) != null) {
+						loadSettlement(output);
+						settlementCount++;
+					}
+					plugin.log.info("Finished loading settlements!");
+				} catch (EOFException e) {
+					plugin.log.info("Finished loading settlements! " + settlementCount + " settlements were loaded!");
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+		});
+		readPlayers.start();
+		readSettlements.start();*/
 	}
 
 	protected static void destroy() {
 		
 	}
-
-	public static void addNewPlayer(Player plr, SettlementPlayer sp) {
-		allPlayers.put(plr, sp);
-		newPlayers.add(sp);
-	}
-	
 	
 }

@@ -13,7 +13,7 @@ public class SettlementPlayerListener implements Listener {
 	@SuppressWarnings("static-method")
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void playerLogin(PlayerLoginEvent event) {
-		if(!Databases.allPlayers.containsKey(event.getPlayer()))
+		if(!SettlementPlayer.playerMap.containsKey(event.getPlayer()))
 		new SettlementPlayer(event.getPlayer());
 	}
 	

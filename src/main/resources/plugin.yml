@@ -4,4 +4,7 @@ generator: http://dinnerbone.com/minecraft/tools/pluginator/
 main: net.zetaeta.plugins.settlement.SettlementPlugin
 name: Settlement
 startup: postworld
-version: '1.0'
+version: '0.1'
+commands:
+    settlement:
+        usage: /derp
