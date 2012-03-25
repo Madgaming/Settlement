@@ -1,5 +1,9 @@
 package net.zetaeta.plugins.settlement.commands.settlement;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import net.zetaeta.plugins.libraries.ZPUtil;
 import net.zetaeta.plugins.settlement.Settlement;
 import net.zetaeta.plugins.settlement.SettlementData;
 import net.zetaeta.plugins.settlement.SettlementPlayer;
@@ -14,12 +18,12 @@ import org.bukkit.entity.Player;
 
 public class SDelete implements SettlementCommand {
 	
-	private String[] subArgs = {};
+	private Set<String> subArgs = new HashSet<String>();
 	private String[] aliases = {"delete", "disband"};
-	private final String[] usage;
+	private String[] usage;
 	private SettlementCommand parent;
 	private SettlementPermission permission;
-	private SettlementCommand[] children = {};
+	private Set<SettlementCommand> children = new HashSet<SettlementCommand>();
 	
 	public static SDelete scDelete;
 	
@@ -44,7 +48,7 @@ public class SDelete implements SettlementCommand {
 	 * */
 	@Override
 	public String[] getArgs() {
-		return subArgs;
+		return subArgs.toArray(new String[0]);
 	}
 	
 	/**
@@ -60,6 +64,7 @@ public class SDelete implements SettlementCommand {
 		
 		if (!(sender instanceof Player)) {
 			sender.sendMessage("§cThis command can only be run by a player.");
+			return true;
 		}
 		
 		SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
@@ -71,20 +76,47 @@ public class SDelete implements SettlementCommand {
 			SettlementData data = sPlayer.getData(sPlayer.getFocus());
 			if (!data.getRank().isEqualOrSuperiorTo(SettlementRank.OWNER)) {
 				sender.sendMessage("§2You do not have sufficient rights to do this!");
+				return true;
 			}
 			getConfirmation(sPlayer, sPlayer.getFocus());
 		}
 		else {
-			Settlement actedUpon = null;
-			Settlement[] settlements = sPlayer.getSettlements();
-			for (Settlement set : settlements) {
-				if (set.getName().equalsIgnoreCase(args[0])) {
-					actedUpon = set;
-					break;
+			String settlementName = ZPUtil.arrayAsString(args);
+			if (sender.hasPermission("settlement.admin.override")) {
+				Settlement actedUpon = null;
+				for (Settlement set : Settlement.allSettlements) {
+					if (set.getName().equalsIgnoreCase(settlementName)) {
+						actedUpon = set;
+						break;
+					}
 				}
+				if (actedUpon == null) {
+					sender.sendMessage("§cThere is no settlement of that name!");
+					return true;
+				}
+				getConfirmation(sPlayer, actedUpon);
 			}
-			if (actedUpon == null) {
-				sender.sendMessage("§c")
+			else {
+				Settlement actedUpon = null;
+				Settlement[] settlements = sPlayer.getSettlements();
+				for (Settlement set : settlements) {
+					if (set.getName().equalsIgnoreCase(settlementName)) {
+						actedUpon = set;
+						break;
+					}
+				}
+				if (actedUpon == null) {
+					sender.sendMessage("§cYou are not in a settlement of that name!");
+					return true;
+				}
+				SettlementData data = sPlayer.getData(actedUpon);
+				if (!data.getRank().isEqualOrSuperiorTo(SettlementRank.OWNER)) {
+					sender.sendMessage("§2You do not have sufficient rights to do this!");
+					return true;
+				}
+				
+				getConfirmation(sPlayer, actedUpon);
+				return true;
 			}
 		}
 		
@@ -93,12 +125,10 @@ public class SDelete implements SettlementCommand {
 
 	private static void getConfirmation(SettlementPlayer sPlayer, final Settlement settlement) {
 		sPlayer.setConfirmable(new Runnable() {
-
 			@Override
 			public void run() {
 				settlement.delete();
 			}
-			
 		});
 	}
 
@@ -128,7 +158,7 @@ public class SDelete implements SettlementCommand {
 
 	@Override
 	public SettlementCommand[] getChildren() {
-		return children;
+		return children.toArray(new SettlementCommand[0]);
 	}
 
 	@Override
@@ -138,8 +168,11 @@ public class SDelete implements SettlementCommand {
 
 	@Override
 	public void registerSubCommand(SettlementCommand subCmd) {
-		// TODO Auto-generated method stub
-		
+		children.add(subCmd);
+		String[] subAliases = subCmd.getAliases();
+		for (String s : subAliases) {
+			subArgs.add(s);
+		}
 	}
 	
 }
