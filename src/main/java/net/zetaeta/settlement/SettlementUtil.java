@@ -1,6 +1,6 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
-import net.zetaeta.plugins.settlement.commands.SettlementPermission;
+import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 

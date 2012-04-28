@@ -1,22 +1,22 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 import java.util.logging.Logger;
 
-import net.zetaeta.plugins.libraries.ZetaPlugin;
-import net.zetaeta.plugins.libraries.commands.CommandExecutor;
-import net.zetaeta.plugins.settlement.commands.SettlementCommands;
+import net.zetaeta.libraries.ManagedJavaPlugin;
+import net.zetaeta.libraries.commands.CommandsManager;
+import net.zetaeta.settlement.commands.SettlementCommandsManager;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 
-public class SettlementPlugin extends ZetaPlugin {
+public class SettlementPlugin extends ManagedJavaPlugin {
 	
 	public Logger log;
 	private PluginManager pm;
 	public FileConfiguration config;
 	public static SettlementPlugin plugin;
-	public CommandExecutor commandHandler;
-	protected SettlementCommands sCommandExec;
+	public CommandsManager commandsManager;
+	protected SettlementCommandsManager sCommandExec;
 	
 	/**
 	 * Contains the unloading procedure for the plugin.
@@ -38,15 +38,11 @@ public class SettlementPlugin extends ZetaPlugin {
 		pm = getServer().getPluginManager();
 		Databases.initialize();
 		Databases.loadDatabases();
-		commandHandler.registerCommandExecutor(sCommandExec);
+		commandsManager.registerCommands(sCommandExec);
 		
 		log.info(this + " is now enabled!");
 	}
 
-	@Override
-	public Logger getPluginLogger() {
-		return log;
-	}
 	
 	
 

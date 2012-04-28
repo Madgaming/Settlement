@@ -1,17 +1,21 @@
-package net.zetaeta.plugins.settlement.commands;
+package net.zetaeta.settlement.commands;
 
-public class SettlementPermission {
+import net.zetaeta.libraries.commands.local.LocalPermission;
+
+public class SettlementPermission extends LocalPermission {
 	private String subPerm;
 	private SettlementPermission parent;
 	
 	public static final MasterSettlementPermission MASTER_PERMISSION = new MasterSettlementPermission();
 	
 	public SettlementPermission(String permission) {
+	    super(permission, MASTER_PERMISSION);
 		subPerm = permission;
 		parent = MASTER_PERMISSION;
 	}
 	
-	public SettlementPermission(SettlementPermission parent, String permission) {
+	public SettlementPermission(String permission, SettlementPermission parent) {
+	    super(permission, parent);
 		this.parent = parent;
 		this.subPerm = permission;
 	}

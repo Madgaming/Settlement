@@ -1,23 +1,27 @@
-package net.zetaeta.plugins.settlement.commands.settlement;
+package net.zetaeta.settlement.commands.settlement;
 
-import static net.zetaeta.plugins.settlement.SettlementUtil.checkSettlementPermission;
-import static net.zetaeta.plugins.libraries.ZPUtil.*;
-import net.zetaeta.plugins.settlement.Settlement;
-import net.zetaeta.plugins.settlement.SettlementPlayer;
-import net.zetaeta.plugins.settlement.commands.SettlementCommand;
-import net.zetaeta.plugins.settlement.commands.SettlementCommands;
-import net.zetaeta.plugins.settlement.commands.SettlementPermission;
+import static net.zetaeta.libraries.ZPUtil.arrayAsString;
+import static net.zetaeta.settlement.SettlementUtil.checkSettlementPermission;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import net.zetaeta.settlement.Settlement;
+import net.zetaeta.settlement.SettlementPlayer;
+import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.commands.SettlementCommandsManager;
+import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SCreate implements SettlementCommand {
+public class SCreate extends SettlementCommand {
 
 	private String[] subArgs;
 	private SettlementPermission permission;
 	private String[] usage;
 //	private String[] shortUsage = {};
-	private String[] aliases = {"create", "new"};
+	private Set<String> aliases = new HashSet<String>();
 	private SettlementCommand parent;
 	private SettlementCommand[] children = {};
 	
@@ -28,7 +32,7 @@ public class SCreate implements SettlementCommand {
 	
 	
 	{
-		permission = new SettlementPermission(SettlementCommands.OWNER_PERMISSION, "create");
+		permission = new SettlementPermission("create", SettlementCommandsManager.OWNER_PERMISSION);
 		usage = new String[] {
 				"§2========§6Settlement§2========",
 				"§a-------§dCommand Help§a-------",
@@ -36,12 +40,14 @@ public class SCreate implements SettlementCommand {
 				"§a - /settlement create <settlement name>",
 				"§2=============================="
 		};
+		aliases.add("create");
+		aliases.add("new");
 	}
 	
 	/**
-	 * Initialises the command handler class, registering it with SettlementCommands.
+	 * Initialises the command handler class, registering it with SettlementCommandsManager.
 	 * 
-	 * @param parent The SettlementCommands instance, for convenient registration.
+	 * @param parent The SettlementCommandsManager instance, for convenient registration.
 	 * */
 	public SCreate(SettlementCommand parent) {
 		this.parent = parent;
@@ -77,7 +83,7 @@ public class SCreate implements SettlementCommand {
 	 * {@inheritDoc}
 	 * */
 	@Override
-	public String[] getAliases() {
+	public Set<String> getAliases() {
 		return aliases;
 	}
 
@@ -101,7 +107,7 @@ public class SCreate implements SettlementCommand {
 			createSettlement((Player) sender, args);
 			return true;
 		}
-		if (checkSettlementPermission(sender, new SettlementPermission(permission, "server"), true)) {
+		if (checkSettlementPermission(sender, new SettlementPermission("server", permission), true)) {
 			createServerSettlement(args);
 			return true;
 		}

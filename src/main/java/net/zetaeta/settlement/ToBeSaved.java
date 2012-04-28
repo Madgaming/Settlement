@@ -1,4 +1,4 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

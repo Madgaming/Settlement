@@ -1,62 +1,64 @@
-package net.zetaeta.plugins.settlement.commands;
+package net.zetaeta.settlement.commands;
 
-import net.zetaeta.plugins.libraries.commands.Executor;
+import java.util.Set;
+
+import net.zetaeta.libraries.commands.local.AbstractLocalCommandExecutor;
 
 import org.bukkit.command.CommandSender;
 
-public interface SettlementCommand extends Executor {
+public abstract class SettlementCommand extends AbstractLocalCommandExecutor {
 	
 	/**
 	 * Gets the list of all the command's possible subcommand's aliases. 
 	 * Equivalent to running <code>getAliases()</code> on each of the results of <code>getChildren()</code>
 	 * 
 	 * @return String[] of subcommand aliases.
-	 * */
-	public String[] getArgs();
+	 */
+	public abstract String[] getArgs();
 	
 	/**
 	 * Gets an array of the direct children commands of this command.
 	 * 
 	 * @return Array of subcommands.
-	 * */
-	public SettlementCommand[] getChildren();
+	 */
+	public abstract SettlementCommand[] getChildren();
 	
 	/**
-	 * Gets the {@link net.zetaeta.plugins.settlement.commands.SettlementPermission SettlementPermission} associated with this command.
+	 * Gets the {@link net.zetaeta.settlement.commands.SettlementPermission SettlementPermission} associated with this command.
 	 * 
 	 * @return The commands's SettlementPermission
-	 * */
-	public SettlementPermission getPermission();
+	 */
+	public abstract SettlementPermission getPermission();
 	
 	/**
 	 * Gets the usage list for the command, used for improperly formed command or {@literal /settlement help <command>}
 	 * 
 	 * @return Command's usage info.
-	 * */
-	public String[] getUsage();
+	 */
+	public abstract String[] getUsage();
 	
 	/**
 	 * Gets different possible aliases for the subcommand.
 	 * 
 	 * @return Aliases of the command.
-	 * */
-	public String[] getAliases();
+	 */
+	public abstract Set<String> getAliases();
 	
 	/**
 	 * Gets the parent command of the subcommand. 
 	 * e.g. /settlement set owner would return /settlement set.
 	 * 
 	 * @return Parent command.
-	 * */
-	public SettlementCommand getParent();
+	 */
+	public abstract SettlementCommand getParent();
 
 	/**
 	 * Used to register a subcommand to this command.
 	 * Even if a command should not have any subcommands, it should still be properly implemented for future convenience or to make extensions easier.
 	 * 
 	 * @param subCmd Subcommand to be registered.
-	 * */
-	public void registerSubCommand(SettlementCommand subCmd);
+	 */
+	public abstract void registerSubCommand(SettlementCommand subCmd);
 
 	/**
 	 * Runs the subcommand
@@ -68,7 +70,7 @@ public interface SettlementCommand extends Executor {
 	 * @param args Arguments for the command.
 	 * 
 	 * @return Whether the subcommand completed
-	 * */
-	public boolean doCommand(CommandSender sender, String subCommand, String[] args);
+	 */
+	public abstract boolean doCommand(CommandSender sender, String subCommand, String[] args);
 	
 }

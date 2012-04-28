@@ -1,4 +1,4 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 import java.io.Externalizable;
 import java.io.IOException;

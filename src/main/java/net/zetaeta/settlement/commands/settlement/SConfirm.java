@@ -1,13 +1,16 @@
-package net.zetaeta.plugins.settlement.commands.settlement;
+package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.plugins.settlement.SettlementPlayer;
-import net.zetaeta.plugins.settlement.commands.SettlementCommand;
-import net.zetaeta.plugins.settlement.commands.SettlementPermission;
+import java.util.HashSet;
+import java.util.Set;
+
+import net.zetaeta.settlement.SettlementPlayer;
+import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SConfirm implements SettlementCommand {
+public class SConfirm extends SettlementCommand {
 
 	private String[] usage;
 	private SettlementCommand parent;
@@ -37,8 +40,8 @@ public class SConfirm implements SettlementCommand {
 	}
 
 	@Override
-	public String[] getAliases() {
-		return new String[] {};
+	public Set<String> getAliases() {
+		return new HashSet<String>(0);
 	}
 
 	@Override

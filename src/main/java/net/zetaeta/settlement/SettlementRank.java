@@ -1,4 +1,4 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 
 public enum SettlementRank {

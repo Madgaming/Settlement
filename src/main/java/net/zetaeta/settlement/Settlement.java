@@ -1,12 +1,11 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Chunk;
@@ -24,7 +23,9 @@ public class Settlement implements Externalizable {
 	@ToBeSaved
 	private String ownerName;
 	@ToBeSaved
-	private List<Chunk> plots = new ArrayList<Chunk>();
+	private Collection<Chunk> plots = new HashSet<Chunk>();
+	@ToBeSaved
+	private Collection<String> invitations = new HashSet<String>();
 	
 	private SettlementPlayer owner;
 	private Set<SettlementPlayer> members = new HashSet<SettlementPlayer>();
@@ -103,4 +104,20 @@ public class Settlement implements Externalizable {
 		newMember.addData(data);
 	}
 
+	public void addInvitation(String player) {
+		invitations.add(player);
+	}
+	
+	
+	public Collection<String> getInvitations() {
+		return invitations;
+	}
+	
+	public boolean isInvited(SettlementPlayer sPlayer) {
+		return invitations.contains(sPlayer.getName());
+	}
+	
+	public boolean isInvited(String spName) {
+		return invitations.contains(spName);
+	}
 }

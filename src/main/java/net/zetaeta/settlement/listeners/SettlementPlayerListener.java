@@ -1,7 +1,7 @@
-package net.zetaeta.plugins.settlement.listeners;
+package net.zetaeta.settlement.listeners;
 
-import net.zetaeta.plugins.settlement.Databases;
-import net.zetaeta.plugins.settlement.SettlementPlayer;
+import net.zetaeta.settlement.Databases;
+import net.zetaeta.settlement.SettlementPlayer;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

@@ -1,37 +1,41 @@
-package net.zetaeta.plugins.settlement.commands;
+package net.zetaeta.settlement.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import net.zetaeta.plugins.libraries.commands.CommandHandler;
-import net.zetaeta.plugins.libraries.commands.Executor;
-import net.zetaeta.plugins.settlement.commands.settlement.SCreate;
-import net.zetaeta.plugins.settlement.commands.settlement.SDelete;
-import net.zetaeta.plugins.settlement.commands.settlement.SInvite;
+import net.zetaeta.libraries.commands.CommandHandler;
+import net.zetaeta.libraries.commands.DynamicCommandExecutor;
+import net.zetaeta.libraries.commands.Executor;
+import net.zetaeta.libraries.commands.local.AbstractLocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.settlement.commands.settlement.SCreate;
+import net.zetaeta.settlement.commands.settlement.SDelete;
+import net.zetaeta.settlement.commands.settlement.SInvite;
 
-import static net.zetaeta.plugins.libraries.ZPUtil.*;
-import static net.zetaeta.plugins.settlement.SettlementUtil.*;
+import static net.zetaeta.libraries.ZPUtil.*;
+import static net.zetaeta.settlement.SettlementUtil.*;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SettlementCommands implements Executor, SettlementCommand {
+public class SettlementCommandsManager extends DynamicCommandExecutor implements LocalCommandExecutor {
 	
 	private final String[] aliases = null;
 	private Map<String, SettlementCommand> argList = new HashMap<String, SettlementCommand>();
 	private String[] usage;
-	public static SettlementCommands settlementCommands;
+	public static SettlementCommandsManager settlementCommandsManager;
 	public static final SettlementPermission BASIC_PERMISSION;
 	public static final SettlementPermission OWNER_PERMISSION;
 	
 	static {
-		BASIC_PERMISSION = new SettlementPermission(SettlementPermission.MASTER_PERMISSION, "basics");
-		OWNER_PERMISSION = new SettlementPermission(SettlementPermission.MASTER_PERMISSION, "owner");
+		BASIC_PERMISSION = new SettlementPermission("use", SettlementPermission.MASTER_PERMISSION);
+		OWNER_PERMISSION = new SettlementPermission("owner", SettlementPermission.MASTER_PERMISSION);
 	}
 	
 	@SuppressWarnings("unused")
-	protected SettlementCommands() {
-		settlementCommands = this;
+	protected SettlementCommandsManager() {
+		settlementCommandsManager = this;
 		SettlementCommand create = new SCreate(this);
 		SettlementCommand delete = new SDelete(this);
 		SettlementCommand invite = new SInvite(this);
@@ -117,8 +121,21 @@ public class SettlementCommands implements Executor, SettlementCommand {
 
 	@Override
 	public SettlementCommand[] getChildren() {
-		return argList.values().toArray(new SettlementCommands[0]);
+		return argList.values().toArray(new SettlementCommandsManager[0]);
 	}
+
+    @Override
+    public Set<LocalCommandExecutor> getSubCommands() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void registerSubCommand(
+            AbstractLocalCommandExecutor subCommandExecutor) {
+        // TODO Auto-generated method stub
+        
+    }
 	
 	
 	

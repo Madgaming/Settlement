@@ -1,4 +1,4 @@
-package net.zetaeta.plugins.settlement;
+package net.zetaeta.settlement;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.zetaeta.libraries.InterMap;
-import net.zetaeta.plugins.settlement.commands.SettlementPermission;
+import net.zetaeta.libraries.SimpleInterHashMap;
+import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.entity.Player;
 
@@ -19,7 +19,7 @@ import static org.bukkit.Bukkit.getPlayer;
 public class SettlementPlayer implements Externalizable {
 
 	public static final SettlementPlayer SERVER;
-	public static InterMap<Player, SettlementPlayer> playerMap = new InterMap<Player, SettlementPlayer>();
+	public static SimpleInterHashMap<Player, SettlementPlayer> playerMap = new SimpleInterHashMap<Player, SettlementPlayer>();
 	private static Set<SettlementPlayer> newPlayers = new HashSet<SettlementPlayer>();
 	
 //	@ToBeSaved
