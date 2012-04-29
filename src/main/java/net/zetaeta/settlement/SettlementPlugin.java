@@ -11,7 +11,7 @@ import org.bukkit.plugin.PluginManager;
 
 public class SettlementPlugin extends ManagedJavaPlugin {
 	
-	public Logger log;
+	public static Logger log;
 	private PluginManager pm;
 	public FileConfiguration config;
 	public static SettlementPlugin plugin;
@@ -34,11 +34,21 @@ public class SettlementPlugin extends ManagedJavaPlugin {
 	@Override
 	public void onEnable() {
 		log = getLogger();
+		plugin = this;
+		log.info("LOADING...");
 		config = getConfig();
 		pm = getServer().getPluginManager();
-		Databases.initialize();
-		Databases.loadDatabases();
-		commandsManager.registerCommands(sCommandExec);
+//		Databases.initialize();
+//		Databases.loadDatabases();
+		commandsManager = new CommandsManager(this);
+		sCommandExec = new SettlementCommandsManager();
+		try {
+		    commandsManager.registerCommands(sCommandExec);
+		}
+		catch (Throwable t) {
+		    t.printStackTrace();
+		}
+		log.info("Commands Registered");
 		
 		log.info(this + " is now enabled!");
 	}

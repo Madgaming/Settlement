@@ -1,60 +1,49 @@
 package net.zetaeta.settlement.commands.settlement;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalPermission;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SConfirm extends SettlementCommand {
 
-	private String[] usage;
-	private SettlementCommand parent;
-	
-	public SConfirm(SettlementCommand parent) {
-		this.parent = parent;
-	}
-	
-	@Override
-	public String[] getArgs() {
-		return new String[] {};
+    
+	public SConfirm(LocalCommandExecutor parent) {
+	    super(parent);
+        aliases = new String[] {"confirm"};
+	    parent.registerSubCommand(this);
 	}
 
 	@Override
-	public SettlementCommand[] getChildren() {
+	public LocalPermission getPermission() {
 		return null;
 	}
 
 	@Override
-	public SettlementPermission getPermission() {
-		return null;
+	public void registerSubCommand(LocalCommandExecutor subCmd) {
+	
 	}
-
-	@Override
-	public String[] getUsage() {
-		return usage;
+	
+/*	@Override
+	public Set<String> getSubCommandAliases() {
+	    return new HashSet<String>(0);
 	}
-
+	
 	@Override
-	public Set<String> getAliases() {
-		return new HashSet<String>(0);
-	}
-
+	public Collection<LocalCommandExecutor> getSubCommands() {
+	    return new ArrayList<LocalCommandExecutor>();
+	}*/
+	
 	@Override
-	public SettlementCommand getParent() {
-		return parent;
-	}
-
-	@Override
-	public void registerSubCommand(SettlementCommand subCmd) {
-	}
-
-	@Override
-	public boolean doCommand(CommandSender sender, String subCommand, String[] args) {
+	public boolean execute(CommandSender sender, String subCommand, String[] args) {
 		if (!(sender instanceof Player)) {
 			sender.sendMessage("§cThis command can only be run by a player.");
 			return true;
@@ -63,6 +52,10 @@ public class SConfirm extends SettlementCommand {
 			sender.sendMessage(getUsage());
 		}
 		SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+		if (sPlayer.hasConfirmTimedOut()) {
+		    sender.sendMessage("§cYou do not have anything to confirm!");
+		    return true;
+		}
 		Thread thread = new Thread(sPlayer.getConfirmable());
 		thread.start();
 		return true;

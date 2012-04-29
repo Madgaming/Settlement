@@ -5,6 +5,6 @@ main: net.zetaeta.settlement.SettlementPlugin
 name: Settlement
 startup: postworld
 version: '0.1'
-commands:
-    settlement:
-        usage: /derp
+#commands:
+#    settlement:
+#        usage: /derp
