@@ -21,7 +21,7 @@ public class SettlementCommand extends AbstractLocalCommandExecutor {
     }
     
     @Override
-    public LocalPermission getPermission() {
+    public SettlementPermission getPermission() {
         return permission;
     }
     

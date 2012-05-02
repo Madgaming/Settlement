@@ -1,10 +1,13 @@
 package net.zetaeta.settlement;
 
+import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.zetaeta.libraries.ManagedJavaPlugin;
 import net.zetaeta.libraries.commands.CommandsManager;
 import net.zetaeta.settlement.commands.SettlementCommandsManager;
+import net.zetaeta.settlement.listeners.SettlementPlayerListener;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -24,7 +27,13 @@ public class SettlementPlugin extends ManagedJavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		Databases.destroy();
+	    try {
+	        Settlement.saveSettlements();
+	    }
+	    catch (Throwable e) {
+	        log.log(Level.SEVERE, "Error saving Settlements!", e);
+	        e.printStackTrace();
+	    }
 	}
 
 	/**
@@ -38,8 +47,10 @@ public class SettlementPlugin extends ManagedJavaPlugin {
 		log.info("LOADING...");
 		config = getConfig();
 		pm = getServer().getPluginManager();
+		pm.registerEvents(new SettlementPlayerListener(), this);
 //		Databases.initialize();
 //		Databases.loadDatabases();
+		Settlement.loadSettlements();
 		commandsManager = new CommandsManager(this);
 		sCommandExec = new SettlementCommandsManager();
 		try {
@@ -53,7 +64,16 @@ public class SettlementPlugin extends ManagedJavaPlugin {
 		log.info(this + " is now enabled!");
 	}
 
+	public File getSavedDataFolder() {
+	    File sdFolder = new File(getDataFolder(), "data");
+	    sdFolder.mkdirs();
+	    return sdFolder;
+	}
 	
-	
+	public File getPlayersFolder() {
+	    File pFolder = new File(getSavedDataFolder(), "players");
+	    pFolder.mkdirs();
+	    return pFolder;
+	}
 
 }

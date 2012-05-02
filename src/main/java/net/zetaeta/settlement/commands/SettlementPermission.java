@@ -64,6 +64,7 @@ public class SettlementPermission extends SolidLocalPermission {
     
     public SettlementPermission(String permission, SettlementPermission parent) {
         super(permission, parent);
+        this.parent = parent;
     }
     
     public SettlementPermission getAdminPermission() {

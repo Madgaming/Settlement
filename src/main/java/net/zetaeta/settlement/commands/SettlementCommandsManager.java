@@ -11,11 +11,16 @@ import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
 import net.zetaeta.settlement.SettlementPlugin;
+import net.zetaeta.settlement.commands.settlement.SClaim;
 import net.zetaeta.settlement.commands.settlement.SConfirm;
 import net.zetaeta.settlement.commands.settlement.SCreate;
 import net.zetaeta.settlement.commands.settlement.SDelete;
+import net.zetaeta.settlement.commands.settlement.SFocus;
 import net.zetaeta.settlement.commands.settlement.SInfo;
 import net.zetaeta.settlement.commands.settlement.SInvite;
+import net.zetaeta.settlement.commands.settlement.SJoin;
+import net.zetaeta.settlement.commands.settlement.SLeave;
+import net.zetaeta.settlement.commands.settlement.SUsage;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -35,11 +40,16 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
     
     {
-        new SCreate(this);
-        new SDelete(this);
-        new SInvite(this);
-        new SInfo(this);
-        new SConfirm(this);
+        registerSubCommand(new SClaim(this));
+        registerSubCommand(new SConfirm(this));
+        registerSubCommand(new SCreate(this));
+        registerSubCommand(new SDelete(this));
+        registerSubCommand(new SFocus(this));
+        registerSubCommand(new SInfo(this));
+        registerSubCommand(new SInvite(this));
+        registerSubCommand(new SJoin(this));
+        registerSubCommand(new SLeave(this));
+        registerSubCommand(new SUsage(this));
     }
     
     public SettlementCommandsManager() {

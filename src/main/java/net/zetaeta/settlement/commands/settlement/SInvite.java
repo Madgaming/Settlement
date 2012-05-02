@@ -2,12 +2,14 @@ package net.zetaeta.settlement.commands.settlement;
 
 import static net.zetaeta.libraries.ZPUtil.concatString;
 import static net.zetaeta.settlement.util.SettlementMessenger.sendSettlementMessage;
+import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.commands.SettlementPermission;
+import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.Bukkit;
@@ -36,7 +38,6 @@ public class SInvite extends SettlementCommand {
     public SInvite(LocalCommandExecutor parent) {
         super(parent);
         sInvite = this;
-        parent.registerSubCommand(this);
     }
     
     @Override
@@ -44,11 +45,15 @@ public class SInvite extends SettlementCommand {
         if (!SettlementUtil.checkPermission(sender, permission, true)) {
             return true;
         }
-        if (args.length < 1) {
-            sender.sendMessage(usage);
+        CommandArguments cArgs = CommandArguments.processArguments(args, new String[] {"exact", "e"}, new String[0], sender);
+        if (cArgs == null)
+            return true;
+        SettlementPlayer sPlayer = null;
+        String[] newArgs = cArgs.getUnprocessedArgArray();
+        if (newArgs.length < 1) {
+            SettlementMessenger.sendUsage(sender, usage);
             return true;
         }
-        SettlementPlayer sPlayer = null;
         if (sender instanceof Player) {
             sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
         }
@@ -61,23 +66,21 @@ public class SInvite extends SettlementCommand {
             if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(SettlementRank.MOD) && !SettlementUtil.checkPermission(sender, permission.getAdminPermission(), true)) {
                 sendSettlementMessage(sender, "§4You do not have the required rights in Settlement " + invitedTo.getName());
             }
-            if (args[0].equalsIgnoreCase("-e")) { // exact name
-                if (args.length < 2) {
-                    return false;
-                }
-                invitedTo.addInvitation(args[1]);
-                sendSettlementMessage(sender, concatString("§2You have invited ", args[1], " to your Settlement, ", invitedTo.getName()));
-                if (Bukkit.getPlayerExact(args[1]) != null) {
-                    sendSettlementMessage(Bukkit.getPlayerExact(args[1]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
+            if (cArgs.hasBooleanFlag("e") || cArgs.hasBooleanFlag("exact")) { // exact name
+                
+                invitedTo.addInvitation(newArgs[0]);
+                sendSettlementMessage(sender, concatString("§2You have invited ", newArgs[0], " to your Settlement, ", invitedTo.getName()));
+                if (Bukkit.getPlayerExact(newArgs[0]) != null) {
+                    sendSettlementMessage(Bukkit.getPlayerExact(newArgs[0]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
                 }
                 return true;
             }
-            if (args.length == 1) {
-                if (Bukkit.getPlayer(args[0]) != null) {
-                    Player invitee = Bukkit.getPlayer(args[0]);
+            if (newArgs.length == 1) {
+                if (Bukkit.getPlayer(newArgs[0]) != null) {
+                    Player invitee = Bukkit.getPlayer(newArgs[0]);
                     invitedTo.addInvitation(invitee.getName());
                     sendSettlementMessage(sender, concatString("§2You have invited ", invitee.getName(), " to your Settlement, ", invitedTo.getName()));
-                    sendSettlementMessage(Bukkit.getPlayerExact(args[1]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
+                    sendSettlementMessage(Bukkit.getPlayerExact(newArgs[1]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
                     return true;
                 }
                 sender.sendMessage("§cNot an online player!");

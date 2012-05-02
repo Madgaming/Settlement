@@ -25,7 +25,6 @@ public class SClaim extends SettlementCommand {
     
     public SClaim(LocalCommandExecutor parent) {
         super(parent);
-        parent.registerSubCommand(this);
     }
     
     @Override
@@ -49,7 +48,7 @@ public class SClaim extends SettlementCommand {
             return true;
         }
         else {
-            set.sendNoRightsMessage(sPlayer);
+            set.sendNoRightsMessage(sender);
             return true;
         }
         

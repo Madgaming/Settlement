@@ -2,16 +2,24 @@ package net.zetaeta.settlement;
 
 
 public enum SettlementRank {
-	MEMBER(0, SettlementPlugin.plugin.config.getString("settlement.appearance.names.member")), 
-	MOD(1, SettlementPlugin.plugin.config.getString("settlement.appearance.names.mod")), 
-	OWNER(2, SettlementPlugin.plugin.config.getString("settlement.appearance.names.owner"));
+	MEMBER(0, ConfigurationConstants.memberName), 
+	MOD(1, ConfigurationConstants.modName), 
+	OWNER(2, ConfigurationConstants.ownerName);
 	
-	int priority;
-	String name;
+	private int priority;
+	private String name;
 	
 	private SettlementRank(int pri, String name) {
 		priority = pri;
 		this.name = name;
+	}
+	
+	public int getPriority() {
+	    return priority;
+	}
+	
+	public String getName() {
+	    return name;
 	}
 	
 	public static SettlementRank getSuperior(SettlementRank a, SettlementRank b) {

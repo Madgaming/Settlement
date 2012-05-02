@@ -1,59 +1,45 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.libraries.commands.local.LocalPermission;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.commands.SettlementPermission;
+import net.zetaeta.settlement.util.SettlementMessenger;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SConfirm extends SettlementCommand {
 
+    {
+        usage = new String[] {
+                "§2 - /settlement confirm",
+                "§a  Confirm any settlement command awaiting confirmation."
+        };
+        aliases = new String[] {"confirm"};
+    }
     
 	public SConfirm(LocalCommandExecutor parent) {
 	    super(parent);
-        aliases = new String[] {"confirm"};
-	    parent.registerSubCommand(this);
 	}
 
 	@Override
-	public LocalPermission getPermission() {
+	public SettlementPermission getPermission() {
 		return null;
 	}
-
-	@Override
-	public void registerSubCommand(LocalCommandExecutor subCmd) {
-	
-	}
-	
-/*	@Override
-	public Set<String> getSubCommandAliases() {
-	    return new HashSet<String>(0);
-	}
-	
-	@Override
-	public Collection<LocalCommandExecutor> getSubCommands() {
-	    return new ArrayList<LocalCommandExecutor>();
-	}*/
 	
 	@Override
 	public boolean execute(CommandSender sender, String subCommand, String[] args) {
 		if (!(sender instanceof Player)) {
-			sender.sendMessage("§cThis command can only be run by a player.");
+			SettlementMessenger.sendSettlementMessage(sender, "§cThis command can only be run by a player.");
 			return true;
 		}
 		if (args.length != 0) {
-			sender.sendMessage(getUsage());
+			SettlementMessenger.sendUsage(sender, usage);
 		}
 		SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
 		if (sPlayer.hasConfirmTimedOut()) {
-		    sender.sendMessage("§cYou do not have anything to confirm!");
+		    SettlementMessenger.sendSettlementMessage(sender, "§cYou do not have anything to confirm!");
 		    return true;
 		}
 		Thread thread = new Thread(sPlayer.getConfirmable());

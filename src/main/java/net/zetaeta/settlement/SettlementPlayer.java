@@ -1,25 +1,34 @@
 package net.zetaeta.settlement;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.Externalizable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class SettlementPlayer implements Externalizable {
+public class SettlementPlayer implements Externalizable, SettlementConstants {
 
     public static final String SERVER_NAME = "$SERVER$";
-    public static final SettlementPlayer SERVER;
+//    public static final SettlementPlayer SERVER;
     public static Map<Player, SettlementPlayer> playerMap = new HashMap<Player, SettlementPlayer>();
+    
     private static Set<SettlementPlayer> newPlayers = new HashSet<SettlementPlayer>();
     
 //    @ToBeSaved
@@ -36,9 +45,9 @@ public class SettlementPlayer implements Externalizable {
     private Runnable confirmable;
     private boolean confirmTimedOut = true;
     
-    static {
-        SERVER = new SettlementPlayer(SERVER_NAME);
-    }
+//    static {
+//        SERVER = new SettlementPlayer(SERVER_NAME);
+//    }
     
     public SettlementPlayer(Player plr) {
         player = plr;
@@ -46,7 +55,7 @@ public class SettlementPlayer implements Externalizable {
     }
     
     
-    private SettlementPlayer(String SERVER) {
+/*    private SettlementPlayer(String SERVER) {
         if (!SERVER.equals(SERVER_NAME)) {
             name = null;
             player = null;
@@ -54,17 +63,28 @@ public class SettlementPlayer implements Externalizable {
         }
         name = SERVER;
         player = null;
-    }
+    }*/
     
     
-    public static SettlementPlayer getSettlementPlayer(Player plr) {
-        if (playerMap.containsKey(plr))
-            return SettlementPlayer.playerMap.get(plr);
-        SettlementPlayer sp = new SettlementPlayer(plr);
-        addNewPlayer(plr, sp);
+    public static SettlementPlayer getSettlementPlayer(Player player) {
+        if (player == null) {
+            return null;
+        }
+        if (playerMap.containsKey(player))
+            return SettlementPlayer.playerMap.get(player);
+        SettlementPlayer sp = new SettlementPlayer(player);
+        sp.register();
+        addNewPlayer(player, sp);
         return sp;
     }
     
+    public static SettlementPlayer getSettlementPlayer(String name) {
+        return getSettlementPlayer(Bukkit.getPlayer(name));
+    }
+    
+    public static Collection<SettlementPlayer> getOnlinePlayers() {
+        return playerMap.values();
+    }
     
     public static void loadPlayer(SettlementPlayer player) {
         playerMap.put(Bukkit.getPlayer(player.getName()), player);
@@ -79,6 +99,7 @@ public class SettlementPlayer implements Externalizable {
         loadFromFile();
         playerMap.put(player, this);
         for (SettlementData data : settlementsInfo) {
+//            if (Settlement)
             data.getSettlement().addOnlinePlayer(this);
         }
     }
@@ -92,11 +113,83 @@ public class SettlementPlayer implements Externalizable {
     }
     
     protected void loadFromFile() {
-        
+        File playerFile = new File(SettlementPlugin.plugin.getPlayersFolder(), name + ".dat");
+        if (!playerFile.exists()) {
+            try {
+                playerFile.createNewFile();
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Could not create data file for player " + name, e);
+                e.printStackTrace();
+            }
+            return;
+        }
+        DataInputStream dis = null;
+        try {
+            dis = new DataInputStream(new FileInputStream(playerFile));
+        } catch (FileNotFoundException e) {
+            log.log(Level.SEVERE, "Could not find data file for player " + name, e);
+            e.printStackTrace();
+            return;
+        }
+        try {
+            int fileVersion = dis.readInt();
+            if (fileVersion == 0) {
+                Loader.loadPlayerV0_0(this, dis);
+            }
+            else {
+                log.severe("Error reading from player file " + name + "Unsupported format version: " + fileVersion);
+                if (player != null) {
+                    player.sendMessage("§4Error occurred loading Settlement info! Please report this to your administrator!");
+                }
+                return;
+            }
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Error reading from data file of player " + name, e);
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                dis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     protected void saveToFile() {
-        
+        File playerFile = new File(SettlementPlugin.plugin.getPlayersFolder(), name + ".dat");
+        try {
+            playerFile.createNewFile();
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Could not create data file for player " + name, e);
+            e.printStackTrace();
+        }
+        DataOutputStream dos = null;
+        try {
+            dos = new DataOutputStream(new FileOutputStream(playerFile));
+        } catch (FileNotFoundException e) {
+            log.log(Level.SEVERE, "Could not find data file for player " + name, e);
+            e.printStackTrace();
+            try {
+                dos.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            return;
+        }
+        try {
+            Saver.savePlayerV0_0(this, dos);
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Error occurred during saving of player " + name, e);
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                dos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     /**
@@ -274,11 +367,23 @@ public class SettlementPlayer implements Externalizable {
 
 
     public Settlement getFocus() {
+        SettlementPlugin.log.info("getFocus");
+        SettlementPlugin.log.info("" + settlementsInfo.size());
+        for (SettlementData d : settlementsInfo) {
+            SettlementPlugin.log.info(d.getSettlementName());
+            SettlementPlugin.log.info(d.getRank().name());
+        }
         if (settlementsInfo.size() == 1) {
+            SettlementPlugin.log.info("Settlement member");
             SettlementData singleSet = settlementsInfo.iterator().next();
+            SettlementPlugin.log.info(singleSet.getSettlementName());
             focus = singleSet.getSettlement();
         }
         return focus;
+    }
+    
+    public void setFocus(Settlement focus) {
+        this.focus = focus;
     }
 
     public void setConfirmable(Runnable runnable) {
@@ -303,5 +408,74 @@ public class SettlementPlayer implements Externalizable {
 
     public boolean hasConfirmTimedOut() {
         return confirmTimedOut;
+    }
+    
+    public static class Saver {
+        
+        public static final int FILE_FORMAT_VERSION = 0;
+        
+        public static void savePlayerV0_0(SettlementPlayer sPlayer, DataOutputStream dos) throws IOException {
+            log.info("savePlayerV0_0: " + sPlayer.getName());
+            dos.writeInt(FILE_FORMAT_VERSION); // Save format version
+            dos.writeLong(sPlayer.lastOnline);
+            dos.writeChar('{');
+            for (SettlementData data : sPlayer.settlementsInfo) {
+                dos.writeChar(';');
+                saveSettlementDataV0_0(data, dos);
+            }
+            dos.writeChar('}');
+        }
+        
+        public static void saveSettlementDataV0_0(SettlementData data, DataOutputStream dos) throws IOException {
+            dos.writeChar('[');
+            dos.writeInt(data.getUid());
+            dos.writeInt(data.getRank().getPriority());
+            dos.writeUTF(data.getTitle());
+            dos.writeChar(']');
+        }
+    }
+    
+    public static class Loader {
+        
+        public static void loadPlayerV0_0(SettlementPlayer sPlayer, DataInputStream dis) throws IOException {
+            sPlayer.lastOnline = dis.readLong();
+            char c = dis.readChar();
+            if (c == '{') {
+                while (dis.readChar() != '}') {
+                    SettlementData sd = loadDataV0_0(sPlayer, dis);
+                    if (sd != null) {
+                        sPlayer.addData(sd);
+                    }
+                }
+            }
+        }
+        
+        public static SettlementData loadDataV0_0(SettlementPlayer sPlayer, DataInputStream dis) throws IOException {
+            if (dis.readChar() != '[') {
+                return null;
+            }
+            int uid = dis.readInt();
+            int pri = dis.readInt();
+            String title = dis.readUTF();
+            if (dis.readChar() != ']') {
+                return null;
+            }
+            Settlement set = Settlement.getSettlement(uid);
+            if (set == null) {
+                return null;
+            }
+            switch (pri) {
+            case 0 :
+                return new SettlementData(set, SettlementRank.MEMBER, title);
+            case 1 :
+                return new SettlementData(set, SettlementRank.MOD, title);
+            case 2 :
+                return new SettlementData(set, SettlementRank.OWNER, title);
+            default :
+                log.warning("Player " + sPlayer.getName() + " had an invalid rank in " + set.getName());
+                return null;
+            }
+        }
+        
     }
 }

@@ -16,7 +16,6 @@ public class SUsage extends SettlementCommand {
     
     public SUsage(LocalCommandExecutor parent) {
         super(parent);
-        parent.registerSubCommand(this);
     }
     
     

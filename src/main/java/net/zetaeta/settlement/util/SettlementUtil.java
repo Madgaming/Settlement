@@ -1,7 +1,11 @@
 package net.zetaeta.settlement.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.local.LocalPermission;
+import net.zetaeta.settlement.ConfigurationConstants;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 
@@ -10,9 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-public abstract class SettlementUtil extends ZPUtil {
-    
-    protected SettlementUtil() { }
+public class SettlementUtil extends ZPUtil {
     
     /**
      * Checks whether a player has a particular SettlementPermission
@@ -85,12 +87,38 @@ public abstract class SettlementUtil extends ZPUtil {
         return true;
     }
     
+    private static Map<Chunk, Settlement> settlementCache;
+    
     public static Settlement getOwner(Chunk chunk) {
-        for (Settlement settlement : Settlement.getSettlements()) {
-            if (settlement.ownsChunk(chunk)) {
-                return settlement;
+        if (ConfigurationConstants.useChunkOwnershipCacheing) {
+            if (settlementCache == null) {
+                settlementCache = new HashMap<Chunk, Settlement>((int) (ConfigurationConstants.chunkOwnershipCacheSize / 0.75));
+            }
+            if (settlementCache.containsKey(chunk)) {
+                return settlementCache.get(chunk);
             }
         }
-        return null;
+        if (ConfigurationConstants.useSettlementWorldCacheing) {
+            for (Settlement settlement : Settlement.getSettlementsIn(chunk.getWorld())) {
+                if (settlement.ownsChunk(chunk)) {
+                    if (ConfigurationConstants.useChunkOwnershipCacheing) {
+                        settlementCache.put(chunk, settlement);
+                    }
+                    return settlement;
+                }
+            }
+            return null;
+        }
+        else {
+            for (Settlement settlement : Settlement.getSettlements()) {
+                if (settlement.ownsChunk(chunk)) {
+                    if (ConfigurationConstants.useChunkOwnershipCacheing) {
+                        settlementCache.put(chunk, settlement);
+                    }
+                    return settlement;
+                }
+            }
+            return null;
+        }
     }
 }

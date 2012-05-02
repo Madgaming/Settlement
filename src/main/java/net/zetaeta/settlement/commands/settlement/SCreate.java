@@ -10,6 +10,8 @@ import net.zetaeta.settlement.SettlementPlugin;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.commands.SettlementPermission;
+import net.zetaeta.settlement.util.SettlementMessenger;
+import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -32,7 +34,6 @@ public class SCreate extends SettlementCommand {
      * */
     public SCreate(LocalCommandExecutor parent) {
         super(parent);
-        parent.registerSubCommand(this);
     }
 
 
@@ -41,20 +42,28 @@ public class SCreate extends SettlementCommand {
      * */
     @Override
     public boolean execute(CommandSender sender, String subCommand, String[] args) {
-        SettlementPlugin.plugin.log.info("SCreate");
-        if (!checkPermission(sender, permission, true)) {
+        SettlementPlugin.log.info("SCreate");
+        if (!SettlementUtil.checkCommandValid(sender, permission)) {
+            SettlementPlugin.log.info("NoValid");
             return true;
         }
+        SettlementPlugin.log.info("Valid");
         if (args.length < 1) {
-            sender.sendMessage(getUsage());
-        }
-        
-        if (sender instanceof Player) {
-            createSettlement((Player) sender, args);
+            SettlementMessenger.sendUsage(sender, usage);
+            SettlementPlugin.log.info("BadArgs");
             return true;
         }
-        return false;
-            
+        SettlementPlugin.log.info("GoodArgs");
+        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlugin.log.info("GotPlayer");
+        Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(args), Settlement.getNewUID());
+        SettlementPlugin.log.info("Created settlement " + settlement.getName());
+//        settlement.addMember(sPlayer);
+        sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
+        SettlementPlugin.log.info("Data added ");
+        settlement.broadcastSettlementMessage("§a  Settlement Created!");
+        SettlementPlugin.log.info("Sent message");
+        return true;
     }
 
     /**
@@ -67,7 +76,7 @@ public class SCreate extends SettlementCommand {
     public static void createSettlement(Player owner, String[] args) {
         SettlementPlugin.log.info("createSettlement");
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(owner);
-        Settlement settlement = new Settlement(sPlayer, arrayAsString(args));
+        Settlement settlement = new Settlement(sPlayer, arrayAsString(args), Settlement.getNewUID());
         sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
     }
 

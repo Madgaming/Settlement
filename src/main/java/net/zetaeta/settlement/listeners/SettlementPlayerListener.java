@@ -1,9 +1,12 @@
 package net.zetaeta.settlement.listeners;
 
 import net.zetaeta.settlement.Settlement;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlayer;
+import net.zetaeta.settlement.SettlementPlugin;
 import net.zetaeta.settlement.util.SettlementUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,21 +15,27 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class SettlementPlayerListener implements Listener {
+public class SettlementPlayerListener implements Listener, SettlementConstants {
     
     @SuppressWarnings("static-method")
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerLogin(final PlayerLoginEvent event) {
+        log.info("PlayerLogin: " + event.getPlayer().getName());
         if(!SettlementPlayer.playerMap.containsKey(event.getPlayer())) {
-            new SettlementPlayer(event.getPlayer()).register();
+            Bukkit.getScheduler().scheduleAsyncDelayedTask(SettlementPlugin.plugin, new Runnable() {
+                public void run() { 
+                    new SettlementPlayer(event.getPlayer()).register(); 
+                }
+            });
         }
         else {
             event.getPlayer().sendMessage("§4Settlement Error: Please log out and back in to avoid player data corruption.");
         }
     }
     
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogout(PlayerQuitEvent event) {
+        log.info("Player logged out");
         SettlementPlayer.getSettlementPlayer(event.getPlayer()).unregister();
     }
     

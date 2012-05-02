@@ -33,7 +33,6 @@ public class SDelete extends SettlementCommand {
     public SDelete(LocalCommandExecutor parent) {
         super(parent);
         scDelete = this;
-        parent.registerSubCommand(this);
     }
     
     
@@ -66,8 +65,10 @@ public class SDelete extends SettlementCommand {
                 getConfirmation(sPlayer, target);
                 SettlementMessenger.sendSettlementMessage(sender, new String[] {
                         "§4  Are you sure you want to do this?",
-                        "§c  This will delete the Settlement " + target.getName() +" and all its plot/player information!",
-                        "§a  If you are sure, use §2/settlement §aconfirm to confirm the deletion"
+                        "§c  This will delete the Settlement " + target.getName() +" and all its plot/player",
+                        "§c  information!",
+                        "§a  If you are sure, use §2/settlement §aconfirm to confirm the",
+                        "§a  deletion"
                 });
             }
             SettlementData data = sPlayer.getData(sPlayer.getFocus());
@@ -105,7 +106,7 @@ public class SDelete extends SettlementCommand {
                     return true;
                 }
                 if (!data.getRank().isEqualOrSuperiorTo(SettlementRank.OWNER)) {
-                    data.getSettlement().sendNoRightsMessage(sPlayer);
+                    data.getSettlement().sendNoRightsMessage(sender);
                     return true;
                 }
                 

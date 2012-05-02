@@ -7,12 +7,13 @@ import java.io.ObjectOutput;
 
 public class SettlementData implements Externalizable {
 
-    @ToBeSaved
     private String settlementName;
     @ToBeSaved
     private SettlementRank rank;
     @ToBeSaved
     private String title;
+    @ToBeSaved
+    private int settlementUID;
     
     private Settlement settlement;
     
@@ -60,6 +61,7 @@ public class SettlementData implements Externalizable {
         settlementName = settlement.getName();
         this.title = title;
         this.rank = rank;
+        settlementUID = settlement.getUid();
     }
     
     
@@ -103,6 +105,9 @@ public class SettlementData implements Externalizable {
      * @return Associated settlement.
      * */
     public Settlement getSettlement() {
+        if (settlement == null) {
+            settlement = Settlement.getSettlement(settlementName);
+        }
         return settlement;
     }
     
@@ -129,7 +134,12 @@ public class SettlementData implements Externalizable {
      * */
     public void setSettlement(Settlement settlement) {
         this.settlement = settlement;
-        this.settlementName = settlement.getName();
+        settlementName = settlement.getName();
+        settlementUID = settlement.getUid();
+    }
+    
+    public int getUid() {
+        return settlementUID;
     }
     
     public void remove() {

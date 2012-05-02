@@ -4,15 +4,19 @@ import org.bukkit.command.CommandSender;
 
 public class SettlementMessenger {
 
+    public static final String SETTLEMENT_MESSAGE_START_LEFT = "§2=========:";
+
+    public static final String SETTLEMENT_MESSAGE_START_RIGHT = "§2:=========";
+    
     /**
      * The header String for Settlement messages.
      */
-    public static final String SETTLEMENT_MESSAGE_START = "§2========:§6Settlement§2:========";
+    public static final String SETTLEMENT_MESSAGE_START = SETTLEMENT_MESSAGE_START_LEFT + " §6Settlement " + SETTLEMENT_MESSAGE_START_RIGHT;
     
     /**
      * The footer String for Settlement messages.
      */
-    public static final String SETTLEMENT_MESSAGE_END = "§2==============================";
+    public static final String SETTLEMENT_MESSAGE_END = "§6-----------------------------";
     
     /**
      * The header Strings at the top of all Settlement command help/usage pages.
@@ -27,6 +31,11 @@ public class SettlementMessenger {
      * Currently the same as {@link #SETTLEMENT_MESSAGE_END} but exists as a separate constant in case of future change.
      */
     public static final String SETTLEMENT_USAGE_END = SETTLEMENT_MESSAGE_END;
+    
+    public static final String[] SETTLEMENT_GLOBAL_INFO = {
+        "§2  Author: §bZetaeta",
+        "§2  Version: §60.1"
+    };
     
     /**
      * Sends the specified message to the target in Settlement message form, using {@link #SETTLEMENT_MESSAGE_START} and {@link #SETTLEMENT_USAGE_END}
@@ -73,6 +82,10 @@ public class SettlementMessenger {
         target.sendMessage(SETTLEMENT_MESSAGE_START);
         target.sendMessage("§c  You do not have a Settlement in your focus!");
         target.sendMessage(SETTLEMENT_MESSAGE_END);
+    }
+    
+    public static void sendGlobalSettlementInfo(CommandSender target) {
+        sendSettlementMessage(target, SETTLEMENT_GLOBAL_INFO);
     }
     
 }
