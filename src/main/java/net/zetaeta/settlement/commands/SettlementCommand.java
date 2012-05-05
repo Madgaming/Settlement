@@ -1,22 +1,38 @@
 package net.zetaeta.settlement.commands;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.local.AbstractLocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.Command;
+import net.zetaeta.libraries.commands.local.ExecutorWrapper;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalPermission;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
 
-public class SettlementCommand extends AbstractLocalCommandExecutor {
-	protected SettlementPermission permission;
+public class SettlementCommand extends AbstractLocalCommandExecutor implements SettlementConstants {
+    public static final String MASTER_PERMISSION = "settlement";
+    public static final String BASIC_PERMISSION = MASTER_PERMISSION + ".basic";
+    public static final String OWNER_PERMISSION = MASTER_PERMISSION + ".owner";
+    public static final String ADMIN_PERMISSION = MASTER_PERMISSION + ".admin";
+    public static final String ADMIN_BASIC_PERMISSION = ADMIN_PERMISSION + ".basic";
+    public static final String ADMIN_OWNER_PERMISSION = ADMIN_PERMISSION + ".owner";
     
-    public SettlementCommand(LocalCommandExecutor parent) {
+    protected SettlementPermission permission;
+    
+    public SettlementCommand(LocalCommand parent) {
         super(parent);
     }
     
-    public SettlementCommand(LocalCommandExecutor parent, LocalPermission permission, String[] usage, String[] aliases) {
+    public SettlementCommand(LocalCommand parent, LocalPermission permission, String[] usage, String[] aliases) {
         super(parent, permission, usage, aliases);
     }
     
@@ -37,29 +53,21 @@ public class SettlementCommand extends AbstractLocalCommandExecutor {
         }
         return false;
     }
+
+    @Override
+    public void sendUsage(CommandSender target) {
+        SettlementMessenger.sendUsage(target, getUsage());
+    }
     
-    /**
-     * Finds and executes any required subcommands, sending the sender the command's usage if the subcommand returns true.
-     * 
-     * @param sender Sender of the command to pass to the subcommand
-     * @param alias Current command's alias.
-     * @param args Arguments of the current command.
-     * @return True if a subcommand is run, false otherwise. It is recommended for the current command to return true if this method returns true.
-     */
-    @SuppressWarnings("static-access")
-    public boolean doSubCommand(CommandSender sender, String alias, String[] args) {
-        if (args.length < 1) {
-            return false;
-        }
-        if (subCommands.containsKey(args[0])) {
-            if (subCommands.get(args[0]).execute(sender, args[0], SettlementUtil.removeFirstIndex(args))) {
-                return true;
-            }
-            else {
-                SettlementMessenger.sendUsage(sender, subCommands.get(args[0]).getUsage());
-                return true;
+    
+    public List<LocalCommand> registerSubCommands(LocalCommandExecutor commandsExecutor) {
+        Class<? extends LocalCommandExecutor> executorClass = commandsExecutor.getClass();
+        List<LocalCommand> registered = new ArrayList<LocalCommand>(executorClass.getMethods().length);
+        for (Method m : executorClass.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(Command.class)) {
+                registered.add(registerSubCommand(new SettlementExecutorWrapper(this, commandsExecutor, m)));
             }
         }
-        return false;
+        return registered;
     }
 }

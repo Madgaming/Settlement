@@ -3,7 +3,7 @@ package net.zetaeta.settlement.commands.settlement;
 import static net.zetaeta.libraries.ZPUtil.concatString;
 import static net.zetaeta.settlement.util.SettlementMessenger.sendSettlementMessage;
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
@@ -22,10 +22,10 @@ import org.bukkit.entity.Player;
  * @author Daniel
  *
  */
-public class SInvite extends SettlementCommand {
+public class Invite extends SettlementCommand {
     private String[] usage;
     
-    public static SInvite sInvite;
+    public static Invite invite;
     
     {
         permission = new SettlementPermission("invite", SettlementPermission.USE_OWNER_PERMISSION);
@@ -35,9 +35,9 @@ public class SInvite extends SettlementCommand {
         aliases = new String[] {"invite", "add"};
     }
     
-    public SInvite(LocalCommandExecutor parent) {
+    public Invite(LocalCommand parent) {
         super(parent);
-        sInvite = this;
+        invite = this;
     }
     
     @Override

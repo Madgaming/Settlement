@@ -1,7 +1,7 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -12,7 +12,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SLeave extends SettlementCommand {
+public class Leave extends SettlementCommand {
     
     {
         usage = new String[] {
@@ -23,7 +23,7 @@ public class SLeave extends SettlementCommand {
         permission = new SettlementPermission("leave", SettlementPermission.USE_BASIC_PERMISSION);
     }
     
-    public SLeave(LocalCommandExecutor parent) {
+    public Leave(LocalCommand parent) {
         super(parent);
     }
     

@@ -1,7 +1,16 @@
 package net.zetaeta.settlement.commands;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.zetaeta.libraries.commands.local.SolidLocalPermission;
 
+/**
+ * 
+ * @author Zetaeta
+ * @deprecated This was a bad idea in the first place.
+ */
+@Deprecated
 public class SettlementPermission extends SolidLocalPermission {
     public static final SettlementPermission MASTER_PERMISSION;
     public static final SettlementPermission USE_PERMISSION;
@@ -12,6 +21,7 @@ public class SettlementPermission extends SolidLocalPermission {
     public static final SettlementPermission ADMIN_OWNER_PERMISSION;
     private SettlementPermission parent;
     private SettlementPermission adminPermission;
+    private Map<String, SettlementPermission> children = new HashMap<String, SettlementPermission>();
     
     static {
         MASTER_PERMISSION = new SettlementPermission("settlement", null) {
@@ -43,7 +53,7 @@ public class SettlementPermission extends SolidLocalPermission {
                 return this;
             }
         };
-        ADMIN_BASIC_PERMISSION = new SettlementPermission("use", ADMIN_PERMISSION) {
+        ADMIN_BASIC_PERMISSION = new SettlementPermission("basic", ADMIN_PERMISSION) {
             @Override
             public SettlementPermission getAdminPermission() {
                 return this;
@@ -75,5 +85,17 @@ public class SettlementPermission extends SolidLocalPermission {
             return (adminPermission = new SettlementPermission("admin", this));
         }
         return (adminPermission = new SettlementPermission(subPermission, parent.getAdminPermission()));
+    }
+    
+    public boolean registerChild(SettlementPermission child) {
+        if (children.containsKey(child.getSubPermission())) {
+            return false;
+        }
+        children.put(child.getSubPermission(), child);
+        return true;
+    }
+    
+    public SettlementPermission getChild(String childName) {
+        return children.get(childName);
     }
 }

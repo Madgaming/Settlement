@@ -1,7 +1,7 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.ZPUtil;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @SubCommandable
-public class SFocus extends SettlementCommand {
+public class Focus extends SettlementCommand {
     
     {
         usage = new String[] {
@@ -26,20 +26,24 @@ public class SFocus extends SettlementCommand {
         permission = new SettlementPermission("focus", SettlementPermission.USE_BASIC_PERMISSION);
     }
     
-    public SFocus(LocalCommandExecutor parent) {
+    public Focus(LocalCommand parent) {
         super(parent);
         registerSubCommand(new FocusOff(this));
     }
     
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        if (doSubCommand(sender, alias, args)) {
+        if (trySubCommand(sender, alias, args)) {
             return true;
         }
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
             return true;
         }
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        if (args.length == 0) {
+            SettlementMessenger.sendSettlementMessage(sender, "§2  Focus turned off!");
+            sPlayer.setFocus(null);
+        }
         Settlement focus = Settlement.getSettlement(ZPUtil.arrayAsString(args));
         if (focus == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
@@ -63,7 +67,7 @@ public class SFocus extends SettlementCommand {
         
         @Override
         public boolean execute(CommandSender sender, String alias, String[] args) {
-            if (doSubCommand(sender, alias, args)) {
+            if (trySubCommand(sender, alias, args)) {
                 return true;
             }
             if (!SettlementUtil.checkCommandValid(sender, permission)) {

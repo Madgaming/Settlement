@@ -1,6 +1,6 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementPlugin;
@@ -12,7 +12,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SInfo extends SettlementCommand {
+public class Info extends SettlementCommand {
 
     {
         permission = new SettlementPermission("info", SettlementPermission.USE_BASIC_PERMISSION);
@@ -23,7 +23,7 @@ public class SInfo extends SettlementCommand {
         aliases = new String[] {"info"};
     }
     
-    public SInfo(LocalCommandExecutor parent) {
+    public Info(LocalCommand parent) {
         super(parent);
     }
     

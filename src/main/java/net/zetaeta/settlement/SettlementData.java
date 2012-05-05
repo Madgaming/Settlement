@@ -145,4 +145,8 @@ public class SettlementData implements Externalizable {
     public void remove() {
         
     }
+    
+    public String toString() {
+        return getClass().getName() + ": " + getSettlementName() + " (" + getUid() + ") " + rank + "; " + title;
+    }
 }

@@ -1,9 +1,9 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.commands.SettlementCommand;
 
-public class SUsage extends SettlementCommand {
+public class Usage extends SettlementCommand {
 
     {
         usage = new String[] {
@@ -14,7 +14,7 @@ public class SUsage extends SettlementCommand {
         aliases = new String[] {"usage"};
     }
     
-    public SUsage(LocalCommandExecutor parent) {
+    public Usage(LocalCommand parent) {
         super(parent);
     }
     

@@ -3,7 +3,7 @@ package net.zetaeta.settlement.commands.settlement;
 import static net.zetaeta.settlement.util.SettlementMessenger.sendSettlementMessage;
 
 import net.zetaeta.libraries.ZPUtil;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementData;
 import net.zetaeta.settlement.SettlementPlayer;
@@ -17,9 +17,9 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SDelete extends SettlementCommand {
+public class Delete extends SettlementCommand {
     
-    public static SDelete scDelete;
+    public static Delete scDelete;
     
     {
         permission = new SettlementPermission("delete", SettlementPermission.USE_OWNER_PERMISSION);
@@ -30,7 +30,7 @@ public class SDelete extends SettlementCommand {
         aliases = new String[] {"delete", "disband"};
     }
     
-    public SDelete(LocalCommandExecutor parent) {
+    public Delete(LocalCommand parent) {
         super(parent);
         scDelete = this;
     }

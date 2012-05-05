@@ -2,6 +2,9 @@ package net.zetaeta.settlement.commands;
 
 import static net.zetaeta.libraries.ZPUtil.removeFirstIndex;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,28 +12,31 @@ import java.util.Set;
 
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlugin;
-import net.zetaeta.settlement.commands.settlement.SClaim;
-import net.zetaeta.settlement.commands.settlement.SConfirm;
-import net.zetaeta.settlement.commands.settlement.SCreate;
-import net.zetaeta.settlement.commands.settlement.SDelete;
-import net.zetaeta.settlement.commands.settlement.SFocus;
-import net.zetaeta.settlement.commands.settlement.SInfo;
-import net.zetaeta.settlement.commands.settlement.SInvite;
-import net.zetaeta.settlement.commands.settlement.SJoin;
-import net.zetaeta.settlement.commands.settlement.SLeave;
-import net.zetaeta.settlement.commands.settlement.SUsage;
+import net.zetaeta.settlement.commands.settlement.Claim;
+import net.zetaeta.settlement.commands.settlement.Confirm;
+import net.zetaeta.settlement.commands.settlement.Create;
+import net.zetaeta.settlement.commands.settlement.Delete;
+import net.zetaeta.settlement.commands.settlement.Focus;
+import net.zetaeta.settlement.commands.settlement.Info;
+import net.zetaeta.settlement.commands.settlement.Invite;
+import net.zetaeta.settlement.commands.settlement.Join;
+import net.zetaeta.settlement.commands.settlement.Leave;
+import net.zetaeta.settlement.commands.settlement.List;
+import net.zetaeta.settlement.commands.settlement.Usage;
+import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
-import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SettlementCommandsManager extends DynamicCommandExecutor implements LocalCommandExecutor {
+public class SettlementCommandsManager extends DynamicCommandExecutor implements LocalCommand, SettlementConstants {
     
     private final String[] aliases = {};
-    private Map<String, LocalCommandExecutor> subCommands = new HashMap<String, LocalCommandExecutor>();
+    private Map<String, LocalCommand> subCommands = new HashMap<String, LocalCommand>();
     private String[] usage;
     public static SettlementCommandsManager settlementCommandsManager;
     
@@ -40,16 +46,20 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
     
     {
-        registerSubCommand(new SClaim(this));
-        registerSubCommand(new SConfirm(this));
-        registerSubCommand(new SCreate(this));
-        registerSubCommand(new SDelete(this));
-        registerSubCommand(new SFocus(this));
-        registerSubCommand(new SInfo(this));
-        registerSubCommand(new SInvite(this));
-        registerSubCommand(new SJoin(this));
-        registerSubCommand(new SLeave(this));
-        registerSubCommand(new SUsage(this));
+        registerSubCommand(new Claim(this));
+        registerSubCommand(new Confirm(this));
+        registerSubCommand(new Create(this));
+        registerSubCommand(new Delete(this));
+        registerSubCommand(new Focus(this));
+        registerSubCommand(new Info(this));
+        registerSubCommand(new Invite(this));
+        registerSubCommand(new Join(this));
+        registerSubCommand(new Leave(this));
+        registerSubCommand(new List(this));
+        registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
+        registerSubCommand(new Usage(this));
+        
+        registerSubCommand(new Debug(this));
     }
     
     public SettlementCommandsManager() {
@@ -72,10 +82,10 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     
     @net.zetaeta.libraries.commands.Command("settlement")
     public boolean settlementCommand(CommandSender sender, Command command, String cmdlbl, String[] args) {
-        SettlementPlugin.log.info("settlementCommand: " + sender.getName() + ", " + command.getName() + ", " + cmdlbl + ZPUtil.arrayAsString(args));
+        SettlementPlugin.log.info("settlementCommand: " + sender.getName() + ", " + command.getName() + ", " + cmdlbl + " " + ZPUtil.arrayAsString(args));
         if (args.length >= 1) {
             if (subCommands.containsKey(args[0].toLowerCase())) {
-                LocalCommandExecutor sc = subCommands.get(args[0]);
+                LocalCommand sc = subCommands.get(args[0]);
                 if (sc.execute(sender, args[0], removeFirstIndex(args))) {
                     return true;
                 }
@@ -107,12 +117,34 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
      * 
      * @param executor Executor to register subcommand for.
      * */
-    public void registerSubCommand(LocalCommandExecutor executor) {
+    public LocalCommand registerSubCommand(LocalCommand executor) {
         for (String s : executor.getAliases()) {
             subCommands.put(s, executor);
         }
+        return executor;
     }
-
+    
+    public java.util.List<LocalCommand> registerSubCommands(LocalCommandExecutor executor) {
+        Class<? extends LocalCommandExecutor> executorClass = executor.getClass();
+        java.util.List<LocalCommand> registered = new ArrayList<LocalCommand>(executorClass.getMethods().length);
+        for (Method m : executorClass.getDeclaredMethods()) {
+            log.info(m.getName());
+            for (Annotation a : m.getAnnotations()) {
+                log.info(m.getName() + ": " + a.annotationType().getName());
+            }
+            if (m.isAnnotationPresent(net.zetaeta.libraries.commands.local.Command.class)) {
+                log.info("Annotated: " + m.getName());
+                registered.add(registerSubCommand(new SettlementExecutorWrapper(this, executor, m)));
+            }
+            else {
+                log.info("UnAnnotated: ");
+                for (Annotation annotation : m.getAnnotations()) {
+                    log.info(annotation.annotationType().getName());
+                }
+            }
+        }
+        return registered;
+    }
 
     @Override
     public boolean execute(CommandSender sender, String subCommand, String[] args) {
@@ -131,7 +163,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
 
     @Override
-    public LocalCommandExecutor getParent() {
+    public LocalCommand getParent() {
         return this;
     }
 
@@ -141,8 +173,14 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
 
     @Override
-    public Collection<LocalCommandExecutor> getSubCommands() {
+    public Collection<LocalCommand> getSubCommands() {
         return subCommands.values();
+    }
+
+
+    @Override
+    public void sendUsage(CommandSender target) {
+        SettlementMessenger.sendUsage(target, getUsage());
     }
     
     

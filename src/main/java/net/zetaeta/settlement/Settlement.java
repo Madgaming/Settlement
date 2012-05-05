@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -33,9 +34,9 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Settlement implements Externalizable, SettlementConstants {
+public class Settlement implements Externalizable, SettlementConstants, Comparable<Settlement> {
 
-    private static Map<String, Settlement> settlementsByName = new HashMap<String, Settlement>();
+    public static Map<String, Settlement> settlementsByName = new TreeMap<String, Settlement>();
     private static Map<Integer, Settlement> settlementsByUID = new HashMap<Integer, Settlement>();
     private static Map<World, Collection<Settlement>> settlementsByWorld;
     
@@ -115,6 +116,10 @@ public class Settlement implements Externalizable, SettlementConstants {
     }
     
     public static Collection<Settlement> getSettlements() {
+        return settlementsByUID.values();
+    }
+    
+    public static Collection<Settlement> getOrderedSettlements() {
         return settlementsByName.values();
     }
     
@@ -283,6 +288,34 @@ public class Settlement implements Externalizable, SettlementConstants {
         owner = newOwner;
         ownerName = newOwner.getName();
     }
+    
+    public int getPlotCount() {
+        return plots.size();
+    }
+    
+    public int getPlotLimit() {
+        return allowedPlots;
+    }
+    
+    public int getOnlineMemberCount() {
+        return onlineMembers.size();
+    }
+    
+    public int getMemberCount() {
+        return members.size();
+    }
+    
+    public Collection<SettlementPlayer> getOnlineMembers() {
+        return onlineMembers;
+    }
+    
+    public Collection<String> getModeratorNames() {
+        return moderators;
+    }
+    
+    public Collection<String> getMemberNames() {
+        return members;
+    }
 
     /**
      * Adds a player to the Settlement's internal list of who's online.
@@ -291,7 +324,11 @@ public class Settlement implements Externalizable, SettlementConstants {
      */
     public void addOnlinePlayer(SettlementPlayer sPlayer) {
         if (members.contains(sPlayer.getName())) {
+            log.info("Adding player " + sPlayer.getName());
             onlineMembers.add(sPlayer);
+        }
+        else {
+            log.info("Failed adding player " + sPlayer.getName());
         }
     }
     
@@ -340,11 +377,12 @@ public class Settlement implements Externalizable, SettlementConstants {
     @SuppressWarnings("static-access")
     public void sendInfoMessage(CommandSender target) {
         List<String> info = new ArrayList<String>();
-        info.add("§2 - ".concat(slogan == null ? "null" : slogan));
+        info.add("§2 - §a".concat(slogan == null ? "null" : slogan));
         info.add("§2 Owner: ".concat(owner == null ? (ownerName == null ? "owner&name = null" : ownerName) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
         if (moderators.size() > 0) {
-            info.add(SettlementUtil.concatString((moderators.size() * 16) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
+            info.add(SettlementUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
         }
+        info.add("§2  Plots: " + plots.size() + '/' + allowedPlots);
         info.add(getColouredPlayerList());
         sendMessage(target, info.toArray(new String[info.size()]));
     }
@@ -674,5 +712,10 @@ public class Settlement implements Externalizable, SettlementConstants {
             log.info("Loaded Settlement " + set.name);
             return set;
         }
+    }
+
+    @Override
+    public int compareTo(Settlement other) {
+        return this.members.size() == other.members.size() ? 0 : (this.members.size() > other.members.size() ? 1 : -1);
     }
 }

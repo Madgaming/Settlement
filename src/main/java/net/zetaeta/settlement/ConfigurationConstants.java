@@ -14,4 +14,6 @@ public class ConfigurationConstants {
     public static String memberName = "Member";
     public static String modName = "Moderator";
     public static String ownerName = "Owner";
+    public static String wildernessMessage = "§b~ §6Wilderness";
+    public static String denyBuildMessage = "§cYou are not allowed to build in the Settlement %s";
 }

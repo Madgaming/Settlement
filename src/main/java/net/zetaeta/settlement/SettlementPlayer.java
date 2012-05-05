@@ -97,9 +97,10 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
     
     public void register() {
         loadFromFile();
+        log.info(name + ".register()");
         playerMap.put(player, this);
         for (SettlementData data : settlementsInfo) {
-//            if (Settlement)
+            log.info(data.toString());
             data.getSettlement().addOnlinePlayer(this);
         }
     }
@@ -316,6 +317,10 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
         return null;
     }
     
+    public Collection<SettlementData> getData() {
+        return settlementsInfo;
+    }
+    
     public boolean removeData(SettlementData data) {
         return settlementsInfo.remove(data);
     }
@@ -444,6 +449,7 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
                 while (dis.readChar() != '}') {
                     SettlementData sd = loadDataV0_0(sPlayer, dis);
                     if (sd != null) {
+                        log.info(sd.getSettlementName() + ", " + sd.getRank() + ", " + sd.getUid());
                         sPlayer.addData(sd);
                     }
                 }

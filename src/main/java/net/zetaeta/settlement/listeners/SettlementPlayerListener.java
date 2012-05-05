@@ -4,6 +4,7 @@ import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementPlugin;
+import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.Bukkit;
@@ -23,8 +24,8 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
         log.info("PlayerLogin: " + event.getPlayer().getName());
         if(!SettlementPlayer.playerMap.containsKey(event.getPlayer())) {
             Bukkit.getScheduler().scheduleAsyncDelayedTask(SettlementPlugin.plugin, new Runnable() {
-                public void run() { 
-                    new SettlementPlayer(event.getPlayer()).register(); 
+                public void run() {
+                    new SettlementPlayer(event.getPlayer()).register();
                 }
             });
         }
@@ -51,8 +52,17 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
             return;
         }
         Chunk to = event.getTo().getChunk();
+        Chunk from = event.getFrom().getChunk();
         Settlement owner = SettlementUtil.getOwner(to);
-        String slog = owner.getSlogan();
+        Settlement prev = SettlementUtil.getOwner(from);
+        if (owner == prev) {
+            return;
+        }
+        if (owner == null) {
+            SettlementMessenger.sendWildernessMessage(event.getPlayer());
+            return;
+        }
+        SettlementMessenger.sendPlotChangeMessage(event.getPlayer(), owner);
     }
     
 }

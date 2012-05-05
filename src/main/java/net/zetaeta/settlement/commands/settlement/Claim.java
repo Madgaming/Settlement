@@ -1,6 +1,6 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
@@ -12,19 +12,16 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SClaim extends SettlementCommand {
+public class Claim extends SettlementCommand {
     
-    {
+    public Claim(LocalCommand parent) {
+        super(parent);
         aliases = new String[] {"claim", "acquire", "reappropriate"};
         usage = new String[] {
                 "§2 - /settlement claim [settlement name]",
                 "§a  Claim a chunk for your currently focused Settlement, or the specified one."
         };
         permission = new SettlementPermission("claim", SettlementPermission.USE_OWNER_PERMISSION);
-    }
-    
-    public SClaim(LocalCommandExecutor parent) {
-        super(parent);
     }
     
     @Override

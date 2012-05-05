@@ -2,7 +2,7 @@ package net.zetaeta.settlement.commands.settlement;
 
 import static net.zetaeta.libraries.ZPUtil.arrayAsString;
 import static net.zetaeta.settlement.util.SettlementUtil.checkPermission;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementData;
 import net.zetaeta.settlement.SettlementPlayer;
@@ -16,7 +16,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SCreate extends SettlementCommand {
+public class Create extends SettlementCommand {
     
     {
         permission = new SettlementPermission("create", SettlementPermission.USE_OWNER_PERMISSION);
@@ -32,7 +32,7 @@ public class SCreate extends SettlementCommand {
      * 
      * @param parent The SettlementCommandsManager instance, for convenient registration.
      * */
-    public SCreate(LocalCommandExecutor parent) {
+    public Create(LocalCommand parent) {
         super(parent);
     }
 
@@ -42,7 +42,7 @@ public class SCreate extends SettlementCommand {
      * */
     @Override
     public boolean execute(CommandSender sender, String subCommand, String[] args) {
-        SettlementPlugin.log.info("SCreate");
+        SettlementPlugin.log.info("Create");
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
             SettlementPlugin.log.info("NoValid");
             return true;
@@ -56,6 +56,11 @@ public class SCreate extends SettlementCommand {
         SettlementPlugin.log.info("GoodArgs");
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
         SettlementPlugin.log.info("GotPlayer");
+        String setName = SettlementUtil.arrayAsString(args);
+        if (Settlement.getSettlement(setName) != null) {
+            SettlementMessenger.sendSettlementMessage(sender, "§cA settlement with the name §6" + setName + " §calready exists!");
+            return true;
+        }
         Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(args), Settlement.getNewUID());
         SettlementPlugin.log.info("Created settlement " + settlement.getName());
 //        settlement.addMember(sPlayer);

@@ -1,8 +1,7 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.CommandArguments.UnclosedStringException;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -13,7 +12,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SJoin extends SettlementCommand {
+public class Join extends SettlementCommand {
     
     {
         usage = new String[] {
@@ -24,7 +23,7 @@ public class SJoin extends SettlementCommand {
         aliases = new String[] {"join", "enter"};
     }
     
-    public SJoin(LocalCommandExecutor parent) {
+    public Join(LocalCommand parent) {
         super(parent);
     }
     

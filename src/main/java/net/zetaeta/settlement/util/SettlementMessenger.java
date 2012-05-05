@@ -1,5 +1,8 @@
 package net.zetaeta.settlement.util;
 
+import net.zetaeta.settlement.ConfigurationConstants;
+import net.zetaeta.settlement.Settlement;
+
 import org.bukkit.command.CommandSender;
 
 public class SettlementMessenger {
@@ -36,6 +39,12 @@ public class SettlementMessenger {
         "§2  Author: §bZetaeta",
         "§2  Version: §60.1"
     };
+    
+    public static final int LEFT_ALIGN = 0x01;
+    
+    public static final int RIGHT_ALIGN = 0x10;
+    
+    public static final int CENTRE_ALIGN = 0x11;
     
     /**
      * Sends the specified message to the target in Settlement message form, using {@link #SETTLEMENT_MESSAGE_START} and {@link #SETTLEMENT_USAGE_END}
@@ -88,4 +97,49 @@ public class SettlementMessenger {
         sendSettlementMessage(target, SETTLEMENT_GLOBAL_INFO);
     }
     
+    public static void sendWildernessMessage(CommandSender target) {
+        target.sendMessage("  ".concat(ConfigurationConstants.wildernessMessage));
+    }
+    
+    @SuppressWarnings("static-access")
+    public static void sendPlotChangeMessage(CommandSender target, Settlement change) {
+        target.sendMessage(SettlementUtil.concatString(60, "  §b~ §6", change.getName(), " - §a", change.getSlogan().trim()));
+    }
+    
+    public static String makeColumns(int columns, String base, int style) {
+        StringBuilder sb = new StringBuilder(columns);
+        if (base.length() > columns) {
+            base = base.substring(0, columns);
+        }
+        switch (style) {
+        case LEFT_ALIGN :
+            sb.append(base);
+            for (int i=0; i < columns - base.length(); ++i) {
+                sb.append(' ');
+            }
+            break;
+        case RIGHT_ALIGN :
+            for (int i=0; i < columns - base.length(); ++i) {
+                sb.append(' ');
+            }
+            sb.append(base);
+            break;
+        case CENTRE_ALIGN :
+            int half = columns >> 1;
+            for (int i=0; i<half; ++i) {
+                sb.append(' ');
+            }
+            if (half != columns / 2.0D) {
+                sb.append(' ');
+            }
+            sb.append(base);
+           for (int i=0; i<half; ++i) {
+               sb.append(' ');
+           }
+           break;
+        default :
+            throw new IllegalArgumentException("Invalid columnising style: " + style);
+        }
+        return sb.toString();
+    }
 }
