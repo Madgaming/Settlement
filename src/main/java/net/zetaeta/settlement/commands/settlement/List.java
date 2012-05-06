@@ -60,7 +60,7 @@ public class List extends SettlementCommand {
         for (int i=0; i<sentList.length; ++i) {
             sentList[i] = "";
         }
-        sentList[0] = "§2  Name                           Members online / total members  Plots / max plots";
+        sentList[0] = "§2  Name            |             Members |  Plots";
         for (int i = page * 10, j = 1; i < (page * 10) + 10; ++i, ++j) {
             if (i >= sList.size()) {
                 break;
@@ -69,7 +69,7 @@ public class List extends SettlementCommand {
             if (set == null) {
                 continue;
             }
-            sentList[j] = SettlementUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "    ", set.getOnlineMemberCount(), '/', set.getMemberCount());
+            sentList[j] = SettlementUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "      ", set.getOnlineMemberCount(), '/', set.getMemberCount());
         }
         SettlementMessenger.sendSettlementMessage(sender, sentList);
     }

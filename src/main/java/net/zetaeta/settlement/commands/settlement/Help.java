@@ -43,25 +43,19 @@ public class Help extends SettlementCommand {
         catch (NumberFormatException e) {
             return false;
         }
-        sendHelp(sender, page);
+        sendHelp(sender, (page - 1) * 8);
         return true;
     }
     
     public void sendHelp(CommandSender target, int page) {
-//        StringBuilder sb = new StringBuilder(256 * 8);
-//        for (int i=0; i<256; ++i) {
-//            sb.append(i);
-//            sb.append(':');
-//            sb.append((char) i);
-//            sb.append(',');
-//        }
-//        target.sendMessage(sb.toString());
         int count = 0;
         ArrayList<String> usage = new ArrayList<String>();
-        for (Iterator<LocalCommand> subCommands = parent.getOrderedSubCommands().iterator(); subCommands.hasNext() && count < 8;) {
+        for (Iterator<LocalCommand> subCommands = parent.getOrderedSubCommands().iterator(); subCommands.hasNext() && count < page + 8;) {
             if (count < page) {
+                log.info("Bypassing: " + subCommands.next().getAliases()[0]);
+                log.info("Count: " + count);
+                log.info("Page: " + page);
                 ++count;
-                subCommands.next();
                 continue;
             }
             LocalCommand cmd = subCommands.next();
@@ -74,6 +68,5 @@ public class Help extends SettlementCommand {
             return;
         }
         SettlementMessenger.sendUsage(target, usage.toArray(new String[usage.size()]));
-//        target.sendMessage("\u00bb");
     }
 }

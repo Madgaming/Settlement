@@ -35,8 +35,8 @@ public class SettlementPlayer implements SettlementConstants {
 //    private List<SettlementPermission> permissions;
     @ToBeSaved
     private String name;
-    @ToBeSaved
-    private long lastOnline;
+    @ToBeSaved 
+    protected long lastOnline;
     @ToBeSaved
     private Set<SettlementData> settlementsInfo = new HashSet<SettlementData>();
     
@@ -133,7 +133,7 @@ public class SettlementPlayer implements SettlementConstants {
         try {
             int fileVersion = dis.readInt();
             if (fileVersion == 0) {
-                Loader.loadPlayerV0_0(this, dis);
+                FlatFileIO.loadPlayerV0_0(this, dis);
             }
             else {
                 log.severe("Error reading from player file " + name + "Unsupported format version: " + fileVersion);
@@ -171,13 +171,13 @@ public class SettlementPlayer implements SettlementConstants {
             e.printStackTrace();
             try {
                 dos.close();
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 e1.printStackTrace();
             }
             return;
         }
         try {
-            Saver.savePlayerV0_0(this, dos);
+            FlatFileIO.savePlayerV0_0(this, dos);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Error occurred during saving of player " + name, e);
             e.printStackTrace();
@@ -391,73 +391,4 @@ public class SettlementPlayer implements SettlementConstants {
         return confirmTimedOut;
     }
     
-    public static class Saver {
-        
-        public static final int FILE_FORMAT_VERSION = 0;
-        
-        public static void savePlayerV0_0(SettlementPlayer sPlayer, DataOutputStream dos) throws IOException {
-            dos.writeInt(FILE_FORMAT_VERSION); // Save format version
-            dos.writeLong(sPlayer.lastOnline);
-            dos.writeChar('{');
-            for (SettlementData data : sPlayer.settlementsInfo) {
-                dos.writeChar(';');
-                saveSettlementDataV0_0(data, dos);
-            }
-            dos.writeChar('}');
-        }
-        
-        public static void saveSettlementDataV0_0(SettlementData data, DataOutputStream dos) throws IOException {
-            dos.writeChar('[');
-            dos.writeInt(data.getUid());
-            dos.writeInt(data.getRank().getPriority());
-            dos.writeUTF(data.getTitle());
-            dos.writeChar(']');
-        }
-    }
-    
-    public static class Loader {
-        
-        public static void loadPlayerV0_0(SettlementPlayer sPlayer, DataInputStream dis) throws IOException {
-            sPlayer.lastOnline = dis.readLong();
-            char c = dis.readChar();
-            if (c == '{') {
-                while (dis.readChar() != '}') {
-                    SettlementData sd = loadDataV0_0(sPlayer, dis);
-                    if (sd != null) {
-                        sPlayer.addData(sd);
-                    }
-                }
-            }
-        }
-        
-        public static SettlementData loadDataV0_0(SettlementPlayer sPlayer, DataInputStream dis) throws IOException {
-            if (dis.readChar() != '[') {
-                return null;
-            }
-            int uid = dis.readInt();
-            int pri = dis.readInt();
-            String title = dis.readUTF();
-            if (dis.readChar() != ']') {
-                return null;
-            }
-            Settlement set = Settlement.getSettlement(uid);
-            if (set == null) {
-                return null;
-            }
-            switch (pri) {
-            case 0 :
-                return null;
-            case 1 :
-                return new SettlementData(set, SettlementRank.MEMBER, title);
-            case 2 :
-                return new SettlementData(set, SettlementRank.MOD, title);
-            case 3 :
-                return new SettlementData(set, SettlementRank.OWNER, title);
-            default :
-                log.warning("Player " + sPlayer.getName() + " had an invalid rank in " + set.getName());
-                return null;
-            }
-        }
-        
-    }
 }

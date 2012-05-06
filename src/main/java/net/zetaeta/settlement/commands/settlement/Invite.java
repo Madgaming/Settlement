@@ -83,8 +83,8 @@ public class Invite extends SettlementCommand {
                 if (Bukkit.getPlayer(newArgs[0]) != null) {
                     Player invitee = Bukkit.getPlayer(newArgs[0]);
                     invitedTo.addInvitation(invitee.getName());
-                    sendSettlementMessage(sender, concatString("§2You have invited ", invitee.getName(), " to your Settlement, ", invitedTo.getName()));
-                    sendSettlementMessage(invitee, concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
+                    sendSettlementMessage(sender, concatString("§bYou §2have invited §b", invitee.getName(), " §2to your Settlement, §6", invitedTo.getName(), "§2!"));
+                    sendSettlementMessage(invitee, concatString("§b", sender.getName(), " §2has invited you to the Settlement §6", invitedTo.getName(), "§2!"));
                     return true;
                 }
                 sender.sendMessage("§cNot an online player!");

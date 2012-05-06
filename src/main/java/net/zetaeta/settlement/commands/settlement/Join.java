@@ -44,18 +44,22 @@ public class Join extends SettlementCommand {
         }
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
         Settlement target = SettlementUtil.getFocusedOrStated(sPlayer, args, true);
+        if (target == null) {
+            sender.sendMessage("§c Invalid settlement §6" + SettlementUtil.arrayAsString(args));
+            return true;
+        }
         if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".join", false, true)) {
             target.addMember(sPlayer);
             if (parsedArgs.hasBooleanFlag("silent") || parsedArgs.hasBooleanFlag("s")) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(42 + 16, "§a  You joined the Settlement §6", target.getName(), " §asilently"));
                 return true;
             }
-            target.broadcastSettlementMessage(SettlementUtil.concatString(33 + 16, "§6  ", sPlayer.getName(), " §ahas joined the Settlement!"));
+            target.broadcastSettlementMessage(SettlementUtil.concatString(33 + 16, "§b  ", sPlayer.getName(), " §ahas joined the Settlement!"));
             return true;
         }
         if (target.isInvited(sPlayer)) {
             target.addMember(sPlayer);
-            target.broadcastSettlementMessage(SettlementUtil.concatString(33 + 16, "§6  ", sPlayer.getName(), " §ahas joined the Settlement!"));
+            target.broadcastSettlementMessage(SettlementUtil.concatString(33 + 16, "§b  ", sPlayer.getName(), " §ahas joined the Settlement!"));
             return true;
         }
         else {

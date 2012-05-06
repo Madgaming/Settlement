@@ -18,14 +18,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -64,7 +62,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     private Set<String> baseMembers = new HashSet<String>();
     @ToBeSaved
     private Collection<Chunk> plots = new HashSet<Chunk>();
-    private Map<World, Collection<Chunk>> worldPlots;// = new HashMap<World, Collection<Chunk>>();
+    Map<World, Collection<Chunk>> worldPlots;// = new HashMap<World, Collection<Chunk>>();
     @ToBeSaved
     private Collection<String> invitations = new HashSet<String>(); // Names of players invited to the faction.
     private SettlementPlayer owner;
@@ -85,9 +83,9 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public Settlement(SettlementPlayer owner, String name, int UID) {
         this.name = name;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
-        this.ownerName = owner.getName();
+        this.setOwnerName(owner.getName());
         this.owner = owner;
-        members.add(ownerName);
+        members.add(getOwnerName());
         onlineMembers.add(owner);
         this.UID = UID;
         settlementsByName.put(name, this);
@@ -337,9 +335,20 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      */
     public void setOwner(SettlementPlayer newOwner) { 
         owner = newOwner;
-        ownerName = newOwner.getName();
+        setOwnerName(newOwner.getName());
     }
     
+    public String getOwnerName() {
+        return ownerName;
+    }
+    
+    /**
+     * @param ownerName the ownerName to set
+     */
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
     /**
      * Gets the number of plots currently owned by the Settlement.
      * 
@@ -361,6 +370,24 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         return allowedPlots;
     }
     
+    /**
+     * Gets the number of bonus plots claims given to the settlement.
+     *
+     * @return Bonus plots granted to the settlement.
+     */
+    public int getBonusPlots() {
+        return bonusPlots;
+    }
+
+    /**
+     * Sets the number of bonus plots claims given to the settlement.
+     *
+     * @param bonusPlots the number bonus plots to grant
+     */
+    public void setBonusPlots(int bonusPlots) {
+        this.bonusPlots = bonusPlots;
+    }
+
     /**
      * Gets the number of members currently online.
      * 
@@ -389,6 +416,20 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     }
     
     /**
+     * @return the spawn
+     */
+    public Location getSpawn() {
+        return spawn;
+    }
+
+    /**
+     * @param spawn the spawn to set
+     */
+    public void setSpawn(Location spawn) {
+        this.spawn = spawn;
+    }
+
+    /**
      * Gets a {@link Collection} of {@link SettlementPlayer SettlementPlayers} representing all currently online members.
      * 
      * @return All online members.
@@ -414,7 +455,15 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public Collection<String> getMemberNames() {
         return members;
     }
+    
+    public Collection<String> getBaseMemberNames() {
+        return baseMembers;
+    }
 
+    public void addModerator(String name) {
+        moderators.add(name);
+    }
+    
     /**
      * Adds a player to the Settlement's internal list of who's online.
      * 
@@ -511,7 +560,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public void sendInfoMessage(CommandSender target) {
         List<String> info = new ArrayList<String>();
         info.add("§2 - §a".concat(slogan == null ? "null" : slogan));
-        info.add("§2 Owner: ".concat(owner == null ? (ownerName == null ? "owner&name = null" : ownerName) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
+        info.add("§2 Owner: ".concat(owner == null ? (getOwnerName() == null ? "owner&name = null" : getOwnerName()) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
         if (moderators.size() > 0) {
             info.add(SettlementUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
         }
@@ -574,7 +623,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * This is calculated by <code>{@literal <bonus plot granted> + (<number of members> * }{@link ConfigurationConstants#plotsPerPlayer})</code>
      */
     public void updateClaimablePlots() {
-        allowedPlots = bonusPlots + (members.size() * ConfigurationConstants.plotsPerPlayer);
+        allowedPlots = getBonusPlots() + (members.size() * ConfigurationConstants.plotsPerPlayer);
     }
     
     /**
@@ -589,6 +638,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             newMember.addData(data);
         }
         updateClaimablePlots();
+    }
+    
+    public void addMember(String newMemberName) {
+        baseMembers.add(newMemberName);
+        members.add(newMemberName);
+        if (SettlementPlayer.getSettlementPlayer(newMemberName) != null) {
+            onlineMembers.add(SettlementPlayer.getSettlementPlayer(newMemberName));
+        }
     }
     
     /**
@@ -701,191 +758,6 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         return invitations.contains(spName);
     }
     
-    public static class FlatFileIO {
-        
-        static Map<World, Collection<Chunk>> reusableWorldPlots;
-        
-        public static final int FILE_FORMAT_VERSION = 0;
-        
-        public static void saveSettlementV0_0(Settlement set, DataOutputStream dos) throws IOException {
-            dos.writeInt(set.UID);
-            dos.writeUTF(set.name);
-            dos.writeUTF(set.slogan);
-            dos.writeInt(set.bonusPlots);
-            if (set.spawn != null) {
-                dos.writeChar('[');
-                UUID sWorldUid = set.spawn.getWorld().getUID();
-                dos.writeLong(sWorldUid.getMostSignificantBits());
-                dos.writeLong(sWorldUid.getLeastSignificantBits());
-                dos.writeInt(set.spawn.getBlockX());
-                dos.writeInt(set.spawn.getBlockY());
-                dos.writeInt(set.spawn.getBlockZ());
-                dos.writeFloat(set.spawn.getYaw());
-                dos.writeFloat(set.spawn.getPitch());
-                dos.writeChar(']');
-            }
-            else {
-                dos.writeChar('|');
-            }
-            dos.writeUTF(set.ownerName);
-            if (set.moderators.size() > 0) {
-                dos.writeChar('{');
-                for (String s : set.moderators) {
-                    dos.writeUTF(s);
-                    dos.writeChar(',');
-                }
-                dos.writeChar('}');
-            }
-            else {
-                dos.writeChar('|');
-            }
-            if (set.baseMembers.size() > 0) {
-                dos.writeChar('{');
-                for (String s : set.baseMembers) {
-                    dos.writeUTF(s);
-                    dos.writeChar(',');
-                }
-                dos.writeChar('}');
-            }
-            else {
-                dos.writeChar('|');
-            }
-            if (ConfigurationConstants.useSettlementWorldCacheing && set.worldPlots != null) {
-                if (set.worldPlots.size() > 0) {
-                    dos.writeChar('{');
-                    for (World wrld : set.worldPlots.keySet()) {
-                        Collection<Chunk> chunks = set.worldPlots.get(wrld);
-                        if (chunks.size() > 0) {
-                            dos.writeChar('{');
-                            dos.writeLong(wrld.getUID().getMostSignificantBits());
-                            dos.writeLong(wrld.getUID().getLeastSignificantBits());
-                            dos.writeChar(':');
-                            for (Chunk ch : chunks) {
-                                dos.writeChar(',');
-                                dos.writeInt(ch.getX());
-                                dos.writeInt(ch.getZ());
-                            }
-                            dos.writeChar('}');
-                            dos.writeChar(';');
-                        }
-                        else {
-                            dos.writeChar('|');
-                        }
-                    }
-                    dos.writeChar('}');
-                }
-                else {
-                    dos.writeChar('|');
-                }
-            } else {
-                if (set.plots.size() > 0) {
-                    if (reusableWorldPlots == null) {
-                        reusableWorldPlots = new HashMap<World, Collection<Chunk>>();
-                    }
-                    for (Chunk ch : set.plots) {
-                        if (reusableWorldPlots.get(ch.getWorld()) == null) {
-                            reusableWorldPlots.put(ch.getWorld(), new HashSet<Chunk>());
-                        }
-                        reusableWorldPlots.get(ch.getWorld()).add(ch);
-                    }
-                    dos.writeChar('{');
-                    for (World wrld : reusableWorldPlots.keySet()) {
-                        Collection<Chunk> chunks = reusableWorldPlots.get(wrld);
-                        if (chunks.size() > 0) {
-                            dos.writeChar('{');
-                            dos.writeLong(wrld.getUID().getMostSignificantBits());
-                            dos.writeLong(wrld.getUID().getLeastSignificantBits());
-                            dos.writeChar(':');
-                            for (Chunk ch : chunks) {
-                                dos.writeChar(',');
-                                dos.writeInt(ch.getX());
-                                dos.writeInt(ch.getZ());
-                            }
-                            dos.writeChar('}');
-                            dos.writeChar(';');
-                        }
-                        else {
-                            dos.writeChar('|');
-                        }
-                    }
-                    dos.writeChar('}');
-                }
-                else {
-                    dos.writeChar('|');
-                }
-            }
-                
-            dos.writeChar('\n');
-        }
-        
-        public static Settlement loadSettlementV0_0(DataInputStream dis) throws IOException {
-            int uid = dis.readInt();
-            String name = dis.readUTF();
-            Settlement set = new Settlement(name, uid);
-            set.slogan = dis.readUTF();
-            set.bonusPlots = dis.readInt();
-            
-            // Spawn location
-            if (dis.readChar() == '[') { // [
-                long sUidStart = dis.readLong();
-                long sUidEnd = dis.readLong();
-                int x = dis.readInt();
-                int y = dis.readInt();
-                int z = dis.readInt();
-                float yaw = dis.readFloat();
-                float pitch = dis.readFloat();
-                dis.readChar(); // ]
-                UUID sWorldUid = new UUID(sUidStart, sUidEnd);
-                World world = Bukkit.getWorld(sWorldUid);
-                if (world != null) {
-                    set.spawn = new Location(world, x, y, z, yaw, pitch);
-                }
-            }
-            // done spawn
-            
-            String ownerName = dis.readUTF();
-            set.ownerName = ownerName;
-            
-//            dis.readChar(); // {
-            char c = dis.readChar();
-            while (c != '|' && c != '}') {
-                set.moderators.add(dis.readUTF());
-                c = dis.readChar();
-            } // }
-//            dis.readChar(); // {
-            c = dis.readChar();
-            while (c != '|' && c != '}') {
-                set.baseMembers.add(dis.readUTF());
-                c = dis.readChar();
-            } // }
-            c = dis.readChar();
-            while (c != '|' && c != '}') { // Worlds
-                c = dis.readChar(); // { / |
-                if (c == '|') {
-                    continue;
-                }
-                long uidStart = dis.readLong();
-                long uidEnd = dis.readLong();
-                UUID worldUid = new UUID(uidStart, uidEnd);
-                World currWorld = Bukkit.getWorld(worldUid);
-                dis.readChar();
-                c = dis.readChar();
-                while (c != '}') {
-                    int cx = dis.readInt();
-                    int cz = dis.readInt();
-                    Chunk chk = currWorld.getChunkAt(cx, cz);
-                    set.addChunk(chk);
-                    c = dis.readChar();
-                }
-                dis.readChar();
-                c = dis.readChar();
-            }
-            dis.readChar(); // \n
-            set.updateMembers();
-            set.updateClaimablePlots();
-            return set;
-        }
-    }
 
     @Override
     public int compareTo(Settlement other) {
