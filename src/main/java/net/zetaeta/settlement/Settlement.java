@@ -83,7 +83,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public Settlement(SettlementPlayer owner, String name, int UID) {
         this.name = name;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
-        this.setOwnerName(owner.getName());
+        this.ownerName = owner.getName();
         this.owner = owner;
         members.add(getOwnerName());
         onlineMembers.add(owner);

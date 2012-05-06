@@ -5,7 +5,6 @@ import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 import net.zetaeta.settlement.util.SubCommandable;

@@ -2,7 +2,6 @@ package net.zetaeta.settlement.commands.settlement.debug;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 

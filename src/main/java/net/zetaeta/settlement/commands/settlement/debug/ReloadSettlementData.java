@@ -6,7 +6,6 @@ import net.zetaeta.settlement.SettlementData;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 

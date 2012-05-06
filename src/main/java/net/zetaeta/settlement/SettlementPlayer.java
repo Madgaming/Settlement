@@ -26,13 +26,10 @@ import org.bukkit.entity.Player;
 public class SettlementPlayer implements SettlementConstants {
 
     public static final String SERVER_NAME = "$SERVER$";
-//    public static final SettlementPlayer SERVER;
     public static Map<Player, SettlementPlayer> playerMap = new HashMap<Player, SettlementPlayer>();
     
     private static Set<SettlementPlayer> newPlayers = new HashSet<SettlementPlayer>();
     
-//    @ToBeSaved
-//    private List<SettlementPermission> permissions;
     @ToBeSaved
     private String name;
     @ToBeSaved 
@@ -45,26 +42,11 @@ public class SettlementPlayer implements SettlementConstants {
     private Runnable confirmable;
     private boolean confirmTimedOut = true;
     
-//    static {
-//        SERVER = new SettlementPlayer(SERVER_NAME);
-//    }
     
     public SettlementPlayer(Player plr) {
         player = plr;
         name = plr.getName();
     }
-    
-    
-/*    private SettlementPlayer(String SERVER) {
-        if (!SERVER.equals(SERVER_NAME)) {
-            name = null;
-            player = null;
-            return;
-        }
-        name = SERVER;
-        player = null;
-    }*/
-    
     
     public static SettlementPlayer getSettlementPlayer(Player player) {
         if (player == null) {

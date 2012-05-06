@@ -5,7 +5,6 @@ import java.util.Map;
 
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.local.LocalPermission;
 import net.zetaeta.settlement.ConfigurationConstants;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementConstants;
@@ -14,7 +13,6 @@ import net.zetaeta.settlement.SettlementPlayer;
 import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class SettlementUtil extends ZPUtil implements SettlementConstants {
     
@@ -40,13 +38,21 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
     
     public static Settlement getFocusedOrStated(SettlementPlayer player, CommandArguments args) {
         Settlement returned;
-        if (args.hasFlagValue("settlement") && (returned = Settlement.getSettlement(args.getFlagValue("settlement"))) != null) {
-            return returned;
+        if (args.hasFlagValue("settlement")) {
+            return Settlement.getSettlement(args.getFlagValue("settlement"));
         }
         if ((returned = Settlement.getSettlement(arrayAsString(args.getUnprocessedArgArray()))) != null) {
             return returned;
         }
         return player.getFocus();
+    }
+    
+    public static Settlement getStated(CommandArguments args) {
+        Settlement returned;
+        if (args.hasFlagValue("settlement")) {
+            return Settlement.getSettlement(args.getFlagValue("settlement"));
+        }
+        return Settlement.getSettlement(arrayAsString(args.getUnprocessedArgArray()));
     }
     
     public static boolean checkCommandValid(CommandSender sender, String permission) {
