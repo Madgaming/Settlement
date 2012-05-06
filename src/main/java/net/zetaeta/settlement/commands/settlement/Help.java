@@ -60,6 +60,8 @@ public class Help extends SettlementCommand {
         ArrayList<String> usage = new ArrayList<String>();
         for (Iterator<LocalCommand> subCommands = parent.getOrderedSubCommands().iterator(); subCommands.hasNext() && count < 8;) {
             if (count < page) {
+                ++count;
+                subCommands.next();
                 continue;
             }
             LocalCommand cmd = subCommands.next();
@@ -67,6 +69,9 @@ public class Help extends SettlementCommand {
             usage.add(cmd.getShortUsage()[0]);
             usage.add(cmd.getShortUsage()[1]);
             ++count;
+        }
+        if (usage.size() == 0) {
+            return;
         }
         SettlementMessenger.sendUsage(target, usage.toArray(new String[usage.size()]));
 //        target.sendMessage("\u00bb");
