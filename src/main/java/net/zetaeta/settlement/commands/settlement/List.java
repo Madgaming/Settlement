@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
+import net.zetaeta.settlement.SettlementThreadManager;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
@@ -29,15 +30,19 @@ public class List extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     @Override
-    public boolean execute(CommandSender sender, String alias, String[] args) {
+    public boolean execute(final CommandSender sender, String alias, String[] args) {
         if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         if (args.length == 0) {
-            sendList(sender, 0);
+            SettlementThreadManager.submitAsyncTask(new Runnable() {
+                public void run() {
+                    sendList(sender, 0);
+                }
+            });
             return true;
         }
-        int page = 0;
+        final int page;
         try {
             page = Integer.parseInt(args[0]);
         }
@@ -45,18 +50,19 @@ public class List extends SettlementCommand {
             sender.sendMessage("§Invalid page number!");
             return false;
         }
-        sendList(sender, page);
+        SettlementThreadManager.submitAsyncTask(new Runnable() {
+            public void run() {
+                sendList(sender, page);
+            }
+        });
         return true;
     }
     
     @SuppressWarnings("static-access")
     public void sendList(CommandSender sender, int page) {
         ArrayList<Settlement> sList = new ArrayList<Settlement>(Settlement.getOrderedSettlements());
-        String[] sentList = new String[11];
-        for (int i=0; i<sentList.length; ++i) {
-            sentList[i] = "";
-        }
-        sentList[0] = "§2  Name            |             Members |  Plots";
+        ArrayList<String> sentList = new ArrayList<String>(11);
+        sentList.add("§2  Name            |             Members |  Plots");
         for (int i = page * 10, j = 1; i < (page * 10) + 10; ++i, ++j) {
             if (i >= sList.size()) {
                 break;
@@ -65,8 +71,8 @@ public class List extends SettlementCommand {
             if (set == null) {
                 continue;
             }
-            sentList[j] = SettlementUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "      ", set.getOnlineMemberCount(), '/', set.getMemberCount());
+            sentList.add(SettlementUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "      ", set.getOnlineMemberCount(), '/', set.getMemberCount()));
         }
-        SettlementMessenger.sendSettlementMessage(sender, sentList);
+        SettlementMessenger.sendSettlementMessage(sender, sentList.toArray(new String[sentList.size()]));
     }
 }

@@ -57,24 +57,13 @@ public class Create extends SettlementCommand {
             SettlementMessenger.sendSettlementMessage(sender, "§cA settlement with the name §6" + setName + " §calready exists!");
             return true;
         }
+        if (setName.length() > 32) {
+            SettlementMessenger.sendSettlementMessage(sender, "§cThat name is too long!");
+            return true;
+        }
         Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(args), Settlement.getNewUID());
-//        settlement.addMember(sPlayer);
         sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
         settlement.broadcastSettlementMessage("§a  Settlement Created!");
         return true;
     }
-
-    /**
-     * Creates a settlement
-     * 
-     * @param owner Playernto own the settlement.
-     * 
-     * @param args Name of settlement in String[] form.
-     * */
-    public static void createSettlement(Player owner, String[] args) {
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(owner);
-        Settlement settlement = new Settlement(sPlayer, arrayAsString(args), Settlement.getNewUID());
-        sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
-    }
-
 }

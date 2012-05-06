@@ -1,6 +1,7 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
@@ -31,7 +32,6 @@ public class Focus extends SettlementCommand {
     
     public Focus(LocalCommand parent) {
         super(parent);
-        registerSubCommand(new FocusOff(this));
     }
     
     @Override
@@ -42,12 +42,13 @@ public class Focus extends SettlementCommand {
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
             return true;
         }
+        CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"off"}, new String[] {"settlement"});
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-        if (args.length == 0) {
+        if (args.length == 0 || cArgs.hasBooleanFlag("off")) {
             SettlementMessenger.sendSettlementMessage(sender, "§2  Focus turned off!");
             sPlayer.setFocus(null);
         }
-        Settlement focus = Settlement.getSettlement(ZPUtil.arrayAsString(args));
+        Settlement focus = SettlementUtil.getStated(cArgs);
         if (focus == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
@@ -55,31 +56,5 @@ public class Focus extends SettlementCommand {
         sPlayer.setFocus(focus);
         SettlementMessenger.sendSettlementMessage(sender, "§a  Settlement focus set to " + focus.getName());
         return true;
-    }
-    
-    @SubCommandable
-    public static class FocusOff extends SettlementCommand {
-        
-        public FocusOff(SettlementCommand parent) {
-            super(parent);
-            usage = parent.getUsage();
-            permission = parent.getPermission();
-            aliases = new String[] {"off", "disable"};
-            parent.registerSubCommand(this);
-        }
-        
-        @Override
-        public boolean execute(CommandSender sender, String alias, String[] args) {
-            if (trySubCommand(sender, alias, args)) {
-                return true;
-            }
-            if (!SettlementUtil.checkCommandValid(sender, permission)) {
-                return true;
-            }
-            SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-            sPlayer.setFocus(null);
-            SettlementMessenger.sendSettlementMessage(sender, "§a  Settlement focus disabled!");
-            return true;
-        }
     }
 }

@@ -83,7 +83,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public Settlement(SettlementPlayer owner, String name, int UID) {
         this.name = name;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
-        this.setOwnerName(owner.getName());
+        this.ownerName = owner.getName();
         this.owner = owner;
         members.add(getOwnerName());
         onlineMembers.add(owner);
@@ -603,7 +603,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * */
     public void delete() {
         settlementsByName.remove(name);
-        settlementsByUID.remove(name);
+        settlementsByUID.remove(UID);
         if (settlementsByWorld != null) {
             settlementsByWorld.remove(name);
         }
@@ -615,6 +615,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
                 sPlayer.setFocus(null);
             }
         }
+        SettlementUtil.clearFromChunkCache(this);
     }
     
     /**

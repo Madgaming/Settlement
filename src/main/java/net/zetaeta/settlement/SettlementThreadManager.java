@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class SettlementThreadManager implements SettlementConstants {
     public static ExecutorService threadPool;
     
+    
     public static void init() {
         threadPool = Executors.newCachedThreadPool();
     }

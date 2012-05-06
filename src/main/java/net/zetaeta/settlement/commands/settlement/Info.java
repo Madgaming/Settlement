@@ -1,5 +1,6 @@
 package net.zetaeta.settlement.commands.settlement;
 
+import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementPlayer;
@@ -32,12 +33,13 @@ public class Info extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     public boolean execute(CommandSender sender, String alias, String[] args) {
+        CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[0], new String[] {"settlement"});
         if (alias.equalsIgnoreCase("info")) {
             if (args.length < 1) {
                 SettlementMessenger.sendGlobalSettlementInfo(sender);
                 return true;
             }
-            Settlement settlement = Settlement.getSettlement(SettlementUtil.arrayAsString(args));
+            Settlement settlement = SettlementUtil.getStated(cArgs);
             if (settlement == null) {
                 SettlementMessenger.sendGlobalSettlementInfo(sender);
                 return true;

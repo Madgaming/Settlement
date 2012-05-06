@@ -43,12 +43,13 @@ public class Invite extends SettlementCommand {
         invite = this;
     }
     
+    @SuppressWarnings("static-access")
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
         if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
-        CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"exact", "e"}, new String[0], sender);
+        CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"exact", "e"}, new String[] {"settlement"}, sender);
         if (cArgs == null)
             return true;
         SettlementPlayer sPlayer = null;
@@ -64,10 +65,11 @@ public class Invite extends SettlementCommand {
             sender.sendMessage("§cThis command can only be run by a player!");
             return true;
         }
-        if (sPlayer != null && sPlayer.getFocus() != null) {
-            Settlement invitedTo = sPlayer.getFocus();
+        Settlement invitedTo = SettlementUtil.getFocusedOrStated(sPlayer, cArgs);
+        if (invitedTo != null) {
             if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(SettlementRank.MOD) && !SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
-                sendSettlementMessage(sender, "§4You do not have the required rights in Settlement " + invitedTo.getName());
+                invitedTo.sendNoRightsMessage(sender);
+                return true;
             }
             if (cArgs.hasBooleanFlag("e") || cArgs.hasBooleanFlag("exact")) { // exact name
                 

@@ -1,6 +1,7 @@
 package net.zetaeta.settlement.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import net.zetaeta.libraries.ZPUtil;
@@ -38,13 +39,21 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
     
     public static Settlement getFocusedOrStated(SettlementPlayer player, CommandArguments args) {
         Settlement returned;
-        if (args.hasFlagValue("settlement") && (returned = Settlement.getSettlement(args.getFlagValue("settlement"))) != null) {
-            return returned;
+        if (args.hasFlagValue("settlement")) {
+            return Settlement.getSettlement(args.getFlagValue("settlement"));
         }
         if ((returned = Settlement.getSettlement(arrayAsString(args.getUnprocessedArgArray()))) != null) {
             return returned;
         }
         return player.getFocus();
+    }
+    
+    public static Settlement getStated(CommandArguments args) {
+        Settlement returned;
+        if (args.hasFlagValue("settlement")) {
+            return Settlement.getSettlement(args.getFlagValue("settlement"));
+        }
+        return Settlement.getSettlement(arrayAsString(args.getUnprocessedArgArray()));
     }
     
     public static boolean checkCommandValid(CommandSender sender, String permission) {
@@ -90,6 +99,14 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
                 }
             }
             return null;
+        }
+    }
+    
+    public static void clearFromChunkCache(Settlement settlement) {
+        for (Iterator<Settlement> setIt = settlementCache.values().iterator(); setIt.hasNext();) {
+            if (setIt.next().equals(settlement)) {
+                setIt.remove();
+            }
         }
     }
 }
