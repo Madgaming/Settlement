@@ -28,6 +28,7 @@ import net.zetaeta.settlement.commands.settlement.Invite;
 import net.zetaeta.settlement.commands.settlement.Join;
 import net.zetaeta.settlement.commands.settlement.Leave;
 import net.zetaeta.settlement.commands.settlement.List;
+import net.zetaeta.settlement.commands.settlement.Spawn;
 import net.zetaeta.settlement.commands.settlement.Usage;
 import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -61,6 +62,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Leave(this));
         registerSubCommand(new List(this));
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
+        registerSubCommands(new Spawn());
         registerSubCommand(new Usage(this));
         
         registerSubCommand(new Debug(this));

@@ -10,7 +10,7 @@ import net.zetaeta.settlement.util.SettlementMessenger;
 
 import org.bukkit.command.CommandSender;
 
-public class SettlementExecutorWrapper extends ExecutorWrapper implements SettlementConstants {
+public class SettlementExecutorWrapper extends ExecutorWrapper implements SettlementConstants, Comparable<LocalCommand> {
     public SettlementExecutorWrapper(LocalCommand parent, LocalCommandExecutor executor, Method executorMethod) {
         super(parent, executor, executorMethod);
     }
@@ -18,6 +18,11 @@ public class SettlementExecutorWrapper extends ExecutorWrapper implements Settle
     @Override
     public void sendUsage(CommandSender target) {
         SettlementMessenger.sendUsage(target, getUsage());
+    }
+
+    @Override
+    public int compareTo(LocalCommand other) {
+        return aliases[0].compareTo(other.getAliases()[0]);
     }
     
     
