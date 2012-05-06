@@ -1,14 +1,10 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 

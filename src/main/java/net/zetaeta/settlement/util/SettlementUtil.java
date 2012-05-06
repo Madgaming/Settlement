@@ -5,7 +5,6 @@ import java.util.Map;
 
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.local.LocalPermission;
 import net.zetaeta.settlement.ConfigurationConstants;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementConstants;
@@ -14,7 +13,6 @@ import net.zetaeta.settlement.SettlementPlayer;
 import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class SettlementUtil extends ZPUtil implements SettlementConstants {
     

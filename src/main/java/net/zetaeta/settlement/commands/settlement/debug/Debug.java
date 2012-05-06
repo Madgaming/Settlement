@@ -2,7 +2,6 @@ package net.zetaeta.settlement.commands.settlement.debug;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 
 import org.bukkit.command.CommandSender;
 
@@ -15,6 +14,9 @@ public class Debug extends SettlementCommand {
         usage = new String[] {
                 "§2 - /settlement debug",
                 "§a  Debug stuff"
+        };
+        shortUsage = new String[] {
+                "", ""
         };
         aliases = new String[] {"debug"};
         registerSubCommand(new ReloadSettlementData(this));

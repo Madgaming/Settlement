@@ -1,15 +1,12 @@
 package net.zetaeta.settlement.commands.settlement;
 
 import static net.zetaeta.libraries.ZPUtil.arrayAsString;
-import static net.zetaeta.settlement.util.SettlementUtil.checkPermission;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementData;
 import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementPlugin;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
