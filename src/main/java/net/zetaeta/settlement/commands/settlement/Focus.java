@@ -19,11 +19,15 @@ public class Focus extends SettlementCommand {
     {
         usage = new String[] {
                 "§2 - /settlement focus <settlement name>",
-                "§a  Focus your commands on a specific Settlement, to avoid having to type out its name multiple times.",
-                "§a  If you are a member of only one Settlement, your focus will be set to that by default."
+                "§a  \u00bbFocus your commands on a specific Settlement, to avoid having to type out its name multiple times.",
+                "§a  \u00bbIf you are a member of only one Settlement, your focus will be set to that by default."
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement focus",
+                "§a  \u00bbFocus on a specific Settlement."
         };
         aliases = new String[] {"focus"};
-        permission = new SettlementPermission("focus", SettlementPermission.USE_BASIC_PERMISSION);
+        permission = BASIC_PERMISSION + ".focus";
     }
     
     public Focus(LocalCommand parent) {

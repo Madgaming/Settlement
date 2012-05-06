@@ -11,7 +11,7 @@ import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;
-import net.zetaeta.settlement.commands.SettlementPermission;
+import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
@@ -22,47 +22,44 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
     
     public Set(LocalCommand parent) {
         super(parent);
-        log.info("Set()");
         List<LocalCommand> registered = registerSubCommands(this);
         usage = new String[] {
-                
+                "§2 - /settlement set name (-name <slogan>) ([-settlement <settlement name>])",
+                "§2 - /settlement set slogan (-slogan <slogan>) ([-settlement <settlement name>])"
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement set",
+                "§a  \u00bbChange proprties of the Settlement."
         };
         aliases = new String[] {"set", "change"};
-        permission = new SettlementPermission("set", SettlementPermission.USE_OWNER_PERMISSION);
-        log.info("Registered subcommands for Set: " + registered);
+        permission = SET_PERMISSION;
     }
     
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        log.info("Set");
         if (trySubCommand(sender, alias, args)) {
-            log.info("subCommand");
             return true;
         }
-        log.info("NoSub");
         return false;
     }
     
     @SuppressWarnings("static-access")
     @Command(aliases = {"slogan", "ham"}, 
-            usage = {"§2 - /settlement set slogan <slogan> [-set <settlement name>]", 
-                     "§a  "},
+            usage = {"§2 - /settlement set slogan (-slogan <slogan>) ([-settlement <settlement name>])", 
+                     "§a  \u00bbSets the slogan of <settlement name> (or you current focus if a Settlement is not specified)"},
+            shortUsage = {"§2 - /settlement set slogan",
+                          "§a  \u00bbChange the settlement's slogan."  },
             permission = SET_PERMISSION + ".slogan",
             useCommandArguments = true,
             valueFlags = {"settlement", "slogan"})
     public boolean setSlogan(CommandSender sender, CommandArguments args) {
-        log.info("setSlogan()");
         if (sender instanceof Player && !args.hasFlagValue("settlement")) { // If a settlement is not specified
-            log.info("No -settlement");
             if (args.getUnprocessedArgs().size() == 0) {
-                log.info("No unprocessed args!");
                 return false;
             }
             SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
             if (sPlayer.getFocus() != null) {
-                log.info("sPlayer has focus!");
                 Settlement target = sPlayer.getFocus();
-                if (sPlayer.getData(target).getRank().isEqualOrSuperiorTo(SettlementRank.MOD) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
-                    log.info("HasRights");
+                if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.MOD) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
                     String slogan = SettlementUtil.arrayAsString(args.getUnprocessedArgArray());
                     target.setSlogan(slogan);
                     target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
@@ -72,7 +69,6 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
                 }
             }
             else {
-                log.info("Focus = null");
                 return false;
             }
         }
@@ -98,7 +94,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             sender.sendMessage("§cThere is no Settlement of that name!");
             return true;
         }
-        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getData(target).getRank().isEqualOrSuperiorTo(SettlementRank.MOD)) {
+        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(SettlementRank.MOD)) {
             target.setSlogan(slogan);
             target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
         }
@@ -108,4 +104,47 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
         return true;
     }
     
+    @SuppressWarnings("static-access")
+    @Command(aliases = {"name", "tag"}, 
+            usage = {"§2 - /settlement set name (-name <slogan>) ([-settlement <settlement name>]) ", 
+                     "§a  \u00bbSets the name of <settlement name> (or you current focus if a Settlement is not specified)"},
+            shortUsage = {"§2 - /settlement set name",
+                          "§a  \u00bbChange the settlement's name."},
+            permission = SET_PERMISSION + ".name",
+            useCommandArguments = true,
+            valueFlags = {"settlement", "name"})
+    public boolean setName(CommandSender sender, CommandArguments args) {
+        if (!SettlementUtil.checkCommandValid(sender, SET_PERMISSION + ".name")) {
+            return true;
+        }
+        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
+        if (settlement == null) {
+            SettlementMessenger.sendInvalidSettlementMessage(sender);
+            return true;
+        }
+        if (args.hasFlagValue("name")) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+                settlement.changeName(args.getFlagValue("name"), sPlayer);
+                return true;
+            }
+            else {
+                settlement.sendNoRightsMessage(sender);
+                return true;
+            }
+        }
+        else if (!settlement.getName().equalsIgnoreCase(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()))) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+                settlement.changeName(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()), sPlayer);
+                return true;
+            }
+            else {
+                settlement.sendNoRightsMessage(sender);
+                return true;
+            }
+        }
+        else {
+            return false;
+        }
+    }
 }

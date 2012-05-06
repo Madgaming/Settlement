@@ -7,8 +7,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
@@ -21,6 +23,7 @@ import net.zetaeta.settlement.commands.settlement.Confirm;
 import net.zetaeta.settlement.commands.settlement.Create;
 import net.zetaeta.settlement.commands.settlement.Delete;
 import net.zetaeta.settlement.commands.settlement.Focus;
+import net.zetaeta.settlement.commands.settlement.Help;
 import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.commands.settlement.Invite;
 import net.zetaeta.settlement.commands.settlement.Join;
@@ -38,6 +41,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     private final String[] aliases = {};
     private Map<String, LocalCommand> subCommands = new HashMap<String, LocalCommand>();
     private String[] usage;
+    private String[] shortUsage;
     public static SettlementCommandsManager settlementCommandsManager;
     
     
@@ -51,6 +55,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Create(this));
         registerSubCommand(new Delete(this));
         registerSubCommand(new Focus(this));
+        registerSubCommand(new Help(this));
         registerSubCommand(new Info(this));
         registerSubCommand(new Invite(this));
         registerSubCommand(new Join(this));
@@ -59,7 +64,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
         registerSubCommand(new Usage(this));
         
-        registerSubCommand(new Debug(this));
+//        registerSubCommand(new Debug(this));
     }
     
     public SettlementCommandsManager() {
@@ -82,7 +87,6 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     
     @net.zetaeta.libraries.commands.Command("settlement")
     public boolean settlementCommand(CommandSender sender, Command command, String cmdlbl, String[] args) {
-        SettlementPlugin.log.info("settlementCommand: " + sender.getName() + ", " + command.getName() + ", " + cmdlbl + " " + ZPUtil.arrayAsString(args));
         if (args.length >= 1) {
             if (subCommands.containsKey(args[0].toLowerCase())) {
                 LocalCommand sc = subCommands.get(args[0]);
@@ -106,10 +110,12 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
      * @return Global /settlement usage help (page 1).
      * */
     public String[] getUsage() {
-        
         return usage;
     }
 
+    public String[] getShortUsage() {
+        return shortUsage;
+    }
     
     /**
      * Registers the subcommand for a specific executor.
@@ -128,18 +134,13 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         Class<? extends LocalCommandExecutor> executorClass = executor.getClass();
         java.util.List<LocalCommand> registered = new ArrayList<LocalCommand>(executorClass.getMethods().length);
         for (Method m : executorClass.getDeclaredMethods()) {
-            log.info(m.getName());
             for (Annotation a : m.getAnnotations()) {
-                log.info(m.getName() + ": " + a.annotationType().getName());
             }
             if (m.isAnnotationPresent(net.zetaeta.libraries.commands.local.Command.class)) {
-                log.info("Annotated: " + m.getName());
                 registered.add(registerSubCommand(new SettlementExecutorWrapper(this, executor, m)));
             }
             else {
-                log.info("UnAnnotated: ");
                 for (Annotation annotation : m.getAnnotations()) {
-                    log.info(annotation.annotationType().getName());
                 }
             }
         }
@@ -153,8 +154,8 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
 
     @Override
-    public SettlementPermission getPermission() {
-        return SettlementPermission.MASTER_PERMISSION;
+    public String getPermission() {
+        return SettlementCommand.MASTER_PERMISSION;
     }
 
     @Override
@@ -174,14 +175,39 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
 
     @Override
     public Collection<LocalCommand> getSubCommands() {
-        return subCommands.values();
+        return new HashSet<LocalCommand>(subCommands.values());
     }
 
+    @Override
+    public Collection<LocalCommand> getOrderedSubCommands() {
+        return new TreeSet<LocalCommand>(subCommands.values());
+    }
 
     @Override
     public void sendUsage(CommandSender target) {
         SettlementMessenger.sendUsage(target, getUsage());
     }
     
+    public LocalCommand getSubCommand(String alias) {
+        String[] aliases = alias.trim().split(" ");
+        if (aliases.length == 1) {
+            return subCommands.get(alias);
+        }
+        else {
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+        }
+    }
     
+    public LocalCommand getSubCommand(String[] aliases) {
+        if (aliases.length == 1) {
+            return subCommands.get(aliases[0]);
+        }
+        else {
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+        }
+    }
+    
+    public String toString() {
+        return "/settlement";
+    }
 }

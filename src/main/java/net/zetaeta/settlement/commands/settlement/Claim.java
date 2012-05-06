@@ -19,9 +19,13 @@ public class Claim extends SettlementCommand {
         aliases = new String[] {"claim", "acquire", "reappropriate"};
         usage = new String[] {
                 "§2 - /settlement claim [settlement name]",
-                "§a  Claim a chunk for your currently focused Settlement, or the specified one."
+                "§a  \u00bbClaim a chunk for your currently focused Settlement, or the specified one."
         };
-        permission = new SettlementPermission("claim", SettlementPermission.USE_OWNER_PERMISSION);
+        shortUsage = new String[] {
+                "§2 - /settlement claim",
+                "§a  \u00bbClaim land for settlement."
+        };
+        permission = OWNER_PERMISSION + ".claim";
     }
     
     @Override
@@ -36,7 +40,7 @@ public class Claim extends SettlementCommand {
         if (set == null) {
             return true;
         }
-        if (SettlementUtil.checkPermissionSilent(sender, permission.getAdminPermission())) {
+        if (SettlementUtil.checkPermission(sender, permission, false, true)) {
             set.claimLand(player);
             return true;
         }

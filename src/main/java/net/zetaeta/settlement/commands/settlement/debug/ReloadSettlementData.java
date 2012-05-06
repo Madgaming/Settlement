@@ -17,17 +17,15 @@ public class ReloadSettlementData extends SettlementCommand {
                 "reloadsettlementdata"
         };
         aliases = new String[] {"reloaddata", "rsd", "rd", "reloadsettlementdata"};
-        permission = new SettlementPermission("reloadsettlementdata", Debug.DEBUG_PERMISSION);
+        permission = Debug.DEBUG_PERMISSION + "reloadsettlementdata";
     }
     
     public boolean execute(CommandSender sender, String alias, String[] args) {
         sender.sendMessage("Reloading...");
         for (Settlement settlement : Settlement.getSettlements()) {
-            log.info("Reloading settlement " + settlement.getName());
             for (SettlementPlayer player : settlement.getOnlineMembers()) {
                 if (player.getData(settlement) == null) {
                     player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MOD : SettlementRank.MEMBER))));
-                    log.info("Reloading player " + player.getName() + " in settlement " + settlement.getName());
                 }
             }
             for (String plNm : settlement.getMemberNames()) {
@@ -35,15 +33,11 @@ public class ReloadSettlementData extends SettlementCommand {
                 if ((player = SettlementPlayer.getSettlementPlayer(plNm)) != null) {
                     if (player.getData(settlement) == null) {
                         player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MOD : SettlementRank.MEMBER))));
-                        log.info("Adding new data to player " + player.getName() + " in settlement " + settlement.getName());
                     }
                 }
             }
         }
         for (SettlementPlayer player : SettlementPlayer.getOnlinePlayers()) {
-            for (SettlementData data : player.getData()) {
-                log.info(data.toString());
-            }
         }
         return true;
     }

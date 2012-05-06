@@ -26,7 +26,7 @@ public class SettlementMessenger {
      */
     public static final String[] SETTLEMENT_USAGE_START = {
         SETTLEMENT_MESSAGE_START,
-        "§a-------§dCommand Help§a-------"
+        "§d---------§eCommand Help§d--------"
     };
     
     /**

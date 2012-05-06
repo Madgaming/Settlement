@@ -19,10 +19,14 @@ import org.bukkit.entity.Player;
 public class Create extends SettlementCommand {
     
     {
-        permission = new SettlementPermission("create", SettlementPermission.USE_OWNER_PERMISSION);
+        permission = OWNER_PERMISSION + ".create";
         usage = new String[] {
                 "§2 - /settlement create <settlement name>",
-                "§a  Create a settlement with the given name, with you as owner.",
+                "§a  \u00bbCreate a settlement with the given name, with you as owner.",
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement create",
+                "§a  \u00bbCreate a settlement"
         };
         aliases = new String[] {"create", "new"};
     }
@@ -40,34 +44,26 @@ public class Create extends SettlementCommand {
     /**
      * {@inheritDoc}
      * */
+    @SuppressWarnings("static-access")
     @Override
     public boolean execute(CommandSender sender, String subCommand, String[] args) {
-        SettlementPlugin.log.info("Create");
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
-            SettlementPlugin.log.info("NoValid");
             return true;
         }
-        SettlementPlugin.log.info("Valid");
         if (args.length < 1) {
             SettlementMessenger.sendUsage(sender, usage);
-            SettlementPlugin.log.info("BadArgs");
             return true;
         }
-        SettlementPlugin.log.info("GoodArgs");
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-        SettlementPlugin.log.info("GotPlayer");
         String setName = SettlementUtil.arrayAsString(args);
         if (Settlement.getSettlement(setName) != null) {
             SettlementMessenger.sendSettlementMessage(sender, "§cA settlement with the name §6" + setName + " §calready exists!");
             return true;
         }
         Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(args), Settlement.getNewUID());
-        SettlementPlugin.log.info("Created settlement " + settlement.getName());
 //        settlement.addMember(sPlayer);
         sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
-        SettlementPlugin.log.info("Data added ");
         settlement.broadcastSettlementMessage("§a  Settlement Created!");
-        SettlementPlugin.log.info("Sent message");
         return true;
     }
 
@@ -79,7 +75,6 @@ public class Create extends SettlementCommand {
      * @param args Name of settlement in String[] form.
      * */
     public static void createSettlement(Player owner, String[] args) {
-        SettlementPlugin.log.info("createSettlement");
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(owner);
         Settlement settlement = new Settlement(sPlayer, arrayAsString(args), Settlement.getNewUID());
         sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));

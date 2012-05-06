@@ -14,18 +14,14 @@ public class Confirm extends SettlementCommand {
     {
         usage = new String[] {
                 "§2 - /settlement confirm",
-                "§a  Confirm any settlement command awaiting confirmation."
+                "§a  \u00bbConfirm any settlement command awaiting confirmation."
         };
+        shortUsage = usage;
         aliases = new String[] {"confirm"};
     }
     
     public Confirm(LocalCommand parent) {
         super(parent);
-    }
-
-    @Override
-    public SettlementPermission getPermission() {
-        return null;
     }
     
     @Override

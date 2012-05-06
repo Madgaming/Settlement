@@ -19,7 +19,11 @@ public class Join extends SettlementCommand {
                 "§2 - /settlement join <settlement name>",
                 "§a  Join the specified settlement if you have a pending invite."
         };
-        permission = new SettlementPermission("join", SettlementPermission.USE_BASIC_PERMISSION);
+        shortUsage = new String[] {
+                "§2 - /settlement join",
+                "§a  \u00bbJoin a settlement."
+        };
+        permission = BASIC_PERMISSION + ".join";
         aliases = new String[] {"join", "enter"};
     }
     
@@ -30,7 +34,7 @@ public class Join extends SettlementCommand {
     @SuppressWarnings("static-access")
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        CommandArguments parsedArgs = CommandArguments.processArguments(args, new String[] {"silent"}, new String[0]);
+        CommandArguments parsedArgs = CommandArguments.processArguments(alias, args, new String[] {"silent"}, new String[0]);
         if (parsedArgs == null) {
             SettlementMessenger.sendSettlementMessage(sender, "§c  Your command could not be parsed!");
             return true;
@@ -40,7 +44,7 @@ public class Join extends SettlementCommand {
         }
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
         Settlement target = SettlementUtil.getFocusedOrStated(sPlayer, args, true);
-        if (SettlementUtil.checkPermissionSilent(sender, permission.getAdminPermission())) {
+        if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".join", false, true)) {
             target.addMember(sPlayer);
             if (parsedArgs.hasBooleanFlag("silent") || parsedArgs.hasBooleanFlag("s")) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(42 + 16, "§a  You joined the Settlement §6", target.getName(), " §asilently"));

@@ -18,7 +18,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
 
-public class SettlementCommand extends AbstractLocalCommandExecutor implements SettlementConstants {
+public class SettlementCommand extends AbstractLocalCommandExecutor implements SettlementConstants, Comparable<LocalCommand> {
     public static final String MASTER_PERMISSION = "settlement";
     public static final String BASIC_PERMISSION = MASTER_PERMISSION + ".basic";
     public static final String OWNER_PERMISSION = MASTER_PERMISSION + ".owner";
@@ -26,18 +26,18 @@ public class SettlementCommand extends AbstractLocalCommandExecutor implements S
     public static final String ADMIN_BASIC_PERMISSION = ADMIN_PERMISSION + ".basic";
     public static final String ADMIN_OWNER_PERMISSION = ADMIN_PERMISSION + ".owner";
     
-    protected SettlementPermission permission;
+    protected String permission;
     
     public SettlementCommand(LocalCommand parent) {
         super(parent);
     }
     
-    public SettlementCommand(LocalCommand parent, LocalPermission permission, String[] usage, String[] aliases) {
+    public SettlementCommand(LocalCommand parent, String permission, String[] usage, String[] aliases) {
         super(parent, permission, usage, aliases);
     }
     
     @Override
-    public SettlementPermission getPermission() {
+    public String getPermission() {
         return permission;
     }
     
@@ -69,5 +69,10 @@ public class SettlementCommand extends AbstractLocalCommandExecutor implements S
             }
         }
         return registered;
+    }
+
+    @Override
+    public int compareTo(LocalCommand other) {
+        return aliases[0].compareTo(other.getAliases()[0]);
     }
 }

@@ -21,7 +21,6 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
     @SuppressWarnings("static-method")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(final PlayerLoginEvent event) {
-        log.info("PlayerLogin: " + event.getPlayer().getName());
         if(!SettlementPlayer.playerMap.containsKey(event.getPlayer())) {
             Bukkit.getScheduler().scheduleAsyncDelayedTask(SettlementPlugin.plugin, new Runnable() {
                 public void run() {
@@ -36,7 +35,6 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
     
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogout(PlayerQuitEvent event) {
-        log.info("Player logged out");
         SettlementPlayer.getSettlementPlayer(event.getPlayer()).unregister();
     }
     

@@ -23,14 +23,18 @@ import org.bukkit.entity.Player;
  *
  */
 public class Invite extends SettlementCommand {
-    private String[] usage;
     
     public static Invite invite;
     
     {
-        permission = new SettlementPermission("invite", SettlementPermission.USE_OWNER_PERMISSION);
+        permission = OWNER_PERMISSION + ".invite";
         usage = new String[] {
-                "§2 - /settlement invite <player>"
+                "§2 - /settlement invite <player>",
+                "§a  \u00bbInvite <player> to the settlement"
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement invite",
+                "§a  \u00bbInvite a player to a settlement."
         };
         aliases = new String[] {"invite", "add"};
     }
@@ -41,11 +45,11 @@ public class Invite extends SettlementCommand {
     }
     
     @Override
-    public boolean execute(CommandSender sender, String subCommand, String[] args) {
-        if (!SettlementUtil.checkPermission(sender, permission, true)) {
+    public boolean execute(CommandSender sender, String alias, String[] args) {
+        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
-        CommandArguments cArgs = CommandArguments.processArguments(args, new String[] {"exact", "e"}, new String[0], sender);
+        CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"exact", "e"}, new String[0], sender);
         if (cArgs == null)
             return true;
         SettlementPlayer sPlayer = null;
@@ -63,7 +67,7 @@ public class Invite extends SettlementCommand {
         }
         if (sPlayer != null && sPlayer.getFocus() != null) {
             Settlement invitedTo = sPlayer.getFocus();
-            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(SettlementRank.MOD) && !SettlementUtil.checkPermission(sender, permission.getAdminPermission(), true)) {
+            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(SettlementRank.MOD) && !SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
                 sendSettlementMessage(sender, "§4You do not have the required rights in Settlement " + invitedTo.getName());
             }
             if (cArgs.hasBooleanFlag("e") || cArgs.hasBooleanFlag("exact")) { // exact name
@@ -80,7 +84,7 @@ public class Invite extends SettlementCommand {
                     Player invitee = Bukkit.getPlayer(newArgs[0]);
                     invitedTo.addInvitation(invitee.getName());
                     sendSettlementMessage(sender, concatString("§2You have invited ", invitee.getName(), " to your Settlement, ", invitedTo.getName()));
-                    sendSettlementMessage(Bukkit.getPlayerExact(newArgs[1]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
+                    sendSettlementMessage(invitee, concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
                     return true;
                 }
                 sender.sendMessage("§cNot an online player!");

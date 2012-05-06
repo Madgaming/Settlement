@@ -7,13 +7,14 @@ import net.zetaeta.settlement.commands.SettlementPermission;
 import org.bukkit.command.CommandSender;
 
 public class Debug extends SettlementCommand {
-    public static final SettlementPermission DEBUG_PERMISSION = new SettlementPermission("debug", SettlementPermission.ADMIN_BASIC_PERMISSION);
+    public static final String DEBUG_PERMISSION = ADMIN_BASIC_PERMISSION + ".debug";
     
     public Debug(LocalCommand parent) {
         super(parent);
         permission = DEBUG_PERMISSION;
         usage = new String[] {
-                "debug"
+                "§2 - /settlement debug",
+                "§a  Debug stuff"
         };
         aliases = new String[] {"debug"};
         registerSubCommand(new ReloadSettlementData(this));

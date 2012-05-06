@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class SettlementPlayer implements Externalizable, SettlementConstants {
+public class SettlementPlayer implements SettlementConstants {
 
     public static final String SERVER_NAME = "$SERVER$";
 //    public static final SettlementPlayer SERVER;
@@ -97,10 +97,8 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
     
     public void register() {
         loadFromFile();
-        log.info(name + ".register()");
         playerMap.put(player, this);
         for (SettlementData data : settlementsInfo) {
-            log.info(data.toString());
             data.getSettlement().addOnlinePlayer(this);
         }
     }
@@ -203,20 +201,6 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
     public static void addNewPlayer(Player player, SettlementPlayer sPlayer) {
         playerMap.put(player, sPlayer);
         newPlayers.add(sPlayer);
-    }
-
-    
-
-    @Override
-    public void readExternal(ObjectInput arg0) throws IOException,
-            ClassNotFoundException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput arg0) throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -363,7 +347,7 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
     }
     
     public SettlementRank getRank(Settlement settlement) {
-        return getData(settlement) != null ? getData(settlement).getRank() : null;
+        return getData(settlement) != null ? getData(settlement).getRank() : SettlementRank.OUTSIDER;
     }
     
     public void setTitle (Settlement settlement, String title) {
@@ -372,16 +356,8 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
 
 
     public Settlement getFocus() {
-        SettlementPlugin.log.info("getFocus");
-        SettlementPlugin.log.info("" + settlementsInfo.size());
-        for (SettlementData d : settlementsInfo) {
-            SettlementPlugin.log.info(d.getSettlementName());
-            SettlementPlugin.log.info(d.getRank().name());
-        }
-        if (settlementsInfo.size() == 1) {
-            SettlementPlugin.log.info("Settlement member");
+        if (focus == null && settlementsInfo.size() == 1) {
             SettlementData singleSet = settlementsInfo.iterator().next();
-            SettlementPlugin.log.info(singleSet.getSettlementName());
             focus = singleSet.getSettlement();
         }
         return focus;
@@ -420,7 +396,6 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
         public static final int FILE_FORMAT_VERSION = 0;
         
         public static void savePlayerV0_0(SettlementPlayer sPlayer, DataOutputStream dos) throws IOException {
-            log.info("savePlayerV0_0: " + sPlayer.getName());
             dos.writeInt(FILE_FORMAT_VERSION); // Save format version
             dos.writeLong(sPlayer.lastOnline);
             dos.writeChar('{');
@@ -449,7 +424,6 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
                 while (dis.readChar() != '}') {
                     SettlementData sd = loadDataV0_0(sPlayer, dis);
                     if (sd != null) {
-                        log.info(sd.getSettlementName() + ", " + sd.getRank() + ", " + sd.getUid());
                         sPlayer.addData(sd);
                     }
                 }
@@ -472,10 +446,12 @@ public class SettlementPlayer implements Externalizable, SettlementConstants {
             }
             switch (pri) {
             case 0 :
-                return new SettlementData(set, SettlementRank.MEMBER, title);
+                return null;
             case 1 :
-                return new SettlementData(set, SettlementRank.MOD, title);
+                return new SettlementData(set, SettlementRank.MEMBER, title);
             case 2 :
+                return new SettlementData(set, SettlementRank.MOD, title);
+            case 3 :
                 return new SettlementData(set, SettlementRank.OWNER, title);
             default :
                 log.warning("Player " + sPlayer.getName() + " had an invalid rank in " + set.getName());

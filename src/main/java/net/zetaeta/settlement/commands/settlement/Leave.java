@@ -17,10 +17,14 @@ public class Leave extends SettlementCommand {
     {
         usage = new String[] {
                 "§2 - /settlement leave [settlement name]",
-                "§a  Leave the specified settlement, or your currently focused one if you have one."
+                "§a  \u00bbLeave the specified settlement, or your currently focused one if you have one."
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement leave",
+                "§a  \u00bbLeave a settlement."
         };
         aliases = new String[] {"leave", "quit", "exit"};
-        permission = new SettlementPermission("leave", SettlementPermission.USE_BASIC_PERMISSION);
+        permission = BASIC_PERMISSION + ".leave";
     }
     
     public Leave(LocalCommand parent) {
@@ -33,7 +37,7 @@ public class Leave extends SettlementCommand {
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
             return true;
         }
-        CommandArguments arguments = CommandArguments.processArguments(args, new String[] {"silent", "s"}, new String[0], sender);
+        CommandArguments arguments = CommandArguments.processArguments(alias, args, new String[] {"silent", "s"}, new String[0], sender);
         if (arguments == null)
             return true;
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
@@ -41,7 +45,7 @@ public class Leave extends SettlementCommand {
         if (from == null) {
             return true;
         }
-        if (SettlementUtil.checkPermissionSilent(sender, permission.getAdminPermission())) {
+        if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".leave", false, true)) {
             if (arguments.hasBooleanFlag("silent") || arguments.hasBooleanFlag("s")) {
                 from.removeMember(sPlayer);
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(40 + 16, "  §a  You left the Settlement §6", from.getName(), " §asilently"));

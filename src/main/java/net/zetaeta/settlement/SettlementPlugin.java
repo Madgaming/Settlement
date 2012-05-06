@@ -11,9 +11,12 @@ import java.util.logging.Logger;
 import net.zetaeta.libraries.ManagedJavaPlugin;
 import net.zetaeta.libraries.commands.CommandsManager;
 import net.zetaeta.settlement.commands.SettlementCommandsManager;
+import net.zetaeta.settlement.listeners.SettlementBlockListener;
 import net.zetaeta.settlement.listeners.SettlementPlayerListener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
 public class SettlementPlugin extends ManagedJavaPlugin {
@@ -39,6 +42,11 @@ public class SettlementPlugin extends ManagedJavaPlugin {
             log.log(Level.SEVERE, "Error saving Settlements!", e);
             e.printStackTrace();
         }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (SettlementPlayer.getSettlementPlayer(player) != null) {
+                SettlementPlayer.getSettlementPlayer(player).unregister();
+            }
+        }
     }
 
     /**
@@ -52,14 +60,22 @@ public class SettlementPlugin extends ManagedJavaPlugin {
         log.info("LOADING...");
         Future<?> settlementLoader = settlementThreadPool.submit(new Runnable() {
             public void run() {
-                Settlement.loadSettlements();
+                int settlementCount = Settlement.loadSettlements();
+                log.info("Loaded" + settlementCount + "Settlements!");
+                int playerCount = 0;
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!SettlementPlayer.playerMap.containsKey(player)) {
+                        new SettlementPlayer(player).register();
+                        ++playerCount;
+                    }
+                }
+                log.info("Loaded " + playerCount + " players!");
             }
         });
         config = getConfig();
         pm = getServer().getPluginManager();
         pm.registerEvents(new SettlementPlayerListener(), this);
-//        Databases.initialize();
-//        Databases.loadDatabases();
+        pm.registerEvents(new SettlementBlockListener(), this);
         commandsManager = new CommandsManager(this);
         sCommandExec = new SettlementCommandsManager();
         try {

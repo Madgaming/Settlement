@@ -21,15 +21,20 @@ public class List extends SettlementCommand {
         super(parent);
         usage = new String[] {
                 "§2 - /settlement list [page number]",
-                "§a  List all Settlements"
+                "§a  \u00bbList all Settlements"
         };
-        permission = new SettlementPermission("list", SettlementPermission.USE_BASIC_PERMISSION);
+        shortUsage = new String[] {
+                "§2 - /settlement list",
+                "§a  \u00bbList all Settlements"
+        };
+        permission = BASIC_PERMISSION + ".list";
         aliases = new String[] {"list", "all"};
     }
     
+    @SuppressWarnings("static-access")
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        if (!SettlementUtil.checkPermission(sender, permission, true)) {
+        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         if (args.length == 0) {
@@ -50,10 +55,7 @@ public class List extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     public void sendList(CommandSender sender, int page) {
-        log.info(Settlement.getOrderedSettlements().toString());
-        log.info(Settlement.settlementsByName.toString());
         ArrayList<Settlement> sList = new ArrayList<Settlement>(Settlement.getOrderedSettlements());
-        log.info(sList.toString());
         String[] sentList = new String[11];
         for (int i=0; i<sentList.length; ++i) {
             sentList[i] = "";
@@ -64,7 +66,6 @@ public class List extends SettlementCommand {
                 break;
             }
             Settlement set = sList.get(i);
-            log.info(j + (set == null ? "null" : set.getName()));
             if (set == null) {
                 continue;
             }

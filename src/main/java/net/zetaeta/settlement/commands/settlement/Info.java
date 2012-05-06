@@ -15,10 +15,15 @@ import org.bukkit.entity.Player;
 public class Info extends SettlementCommand {
 
     {
-        permission = new SettlementPermission("info", SettlementPermission.USE_BASIC_PERMISSION);
+        permission = BASIC_PERMISSION + ".info";
         usage = new String[] {
-                "§2 - /settlement info:",
-                "§a  Get information about the settlement you have focus on",
+                "§2 - /settlement [info] [settlement name]:",
+                "§a  \u00bbGet information about the settlement you have focus on,",
+                "§a  or the global Settlement plugin info."
+        };
+        shortUsage = new String[] {
+                "§2 - /settlement info",
+                "§a  \u00bbGet info on a specific Settlement"
         };
         aliases = new String[] {"info"};
     }
@@ -29,8 +34,6 @@ public class Info extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        SettlementPlugin.log.info("Info");
-        System.out.println("Info");
         if (alias.equalsIgnoreCase("info")) {
             if (args.length < 1) {
                 SettlementMessenger.sendGlobalSettlementInfo(sender);
@@ -41,29 +44,21 @@ public class Info extends SettlementCommand {
                 SettlementMessenger.sendGlobalSettlementInfo(sender);
                 return true;
             }
-            if (!SettlementUtil.checkPermission(sender, permission, true)) {
+            if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
                 return true;
             }
             settlement.sendInfoMessage(sender);
             return true;
         }
-        System.out.println("preHam");
-        System.out.println("args.length = " + args.length);
-        SettlementPlugin.log.info("args.length = " + args.length);
-        System.out.println("ham");
         if (args.length == 0) {
-            System.out.println("argsLength0");
-            System.out.println("if");
-            SettlementPlugin.log.info("argsLength0");
             if (sender instanceof Player) {
                 SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
                 System.out.println(sPlayer.getName());
                 if (sPlayer.getFocus() == null) {
-                    SettlementPlugin.log.info("focusNull");
                     SettlementMessenger.sendGlobalSettlementInfo(sender);
                     return true;
                 }
-                if (!SettlementUtil.checkPermission(sender, permission, true)) {
+                if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
                     return true;
                 }
                 sPlayer.getFocus().sendInfoMessage(sender);
@@ -71,16 +66,12 @@ public class Info extends SettlementCommand {
             }
             SettlementMessenger.sendGlobalSettlementInfo(sender);
         }
-        else {
-            SettlementPlugin.log.info("else: args.length = " + args.length);
-        }
-        SettlementPlugin.log.info("OutsideOfIf");
         Settlement settlement = Settlement.getSettlement(SettlementUtil.arrayAsString(args));
         if (settlement == null) {
             SettlementMessenger.sendGlobalSettlementInfo(sender);
             return true;
         }
-        if (!SettlementUtil.checkPermission(sender, permission, true)) {
+        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         settlement.sendInfoMessage(sender);

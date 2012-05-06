@@ -22,10 +22,14 @@ public class Delete extends SettlementCommand {
     public static Delete scDelete;
     
     {
-        permission = new SettlementPermission("delete", SettlementPermission.USE_OWNER_PERMISSION);
+        permission = OWNER_PERMISSION + ".delete";
         usage = new String[] {
-                "§2 - /settlement delete:",
-                "§a  Delete the settlement you are owner of.",
+                "§2 - /settlement delete [settlement]:",
+                "§a  \u00bbDelete the settlement you specify or have focus over.",
+        };
+        shortUsage = new String[] {
+               "§2 - /settlement delete",
+               "§a  \u00bbDelete a settlement."
         };
         aliases = new String[] {"delete", "disband"};
     }
@@ -41,7 +45,7 @@ public class Delete extends SettlementCommand {
      * */
     @Override
     public boolean execute(CommandSender sender, String subCommand, String[] args) {
-        if (!SettlementUtil.checkPermission(sender, permission, true)) {
+        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         
@@ -61,7 +65,7 @@ public class Delete extends SettlementCommand {
                 });
                 return true;
             }
-            if (SettlementUtil.checkPermissionSilent(sender, permission.getAdminPermission())) {
+            if (SettlementUtil.checkPermission(sender, permission, false, true)) {
                 getConfirmation(sPlayer, target);
                 SettlementMessenger.sendSettlementMessage(sender, new String[] {
                         "§4  Are you sure you want to do this?",
@@ -86,7 +90,7 @@ public class Delete extends SettlementCommand {
         }
         else {
             String settlementName = ZPUtil.arrayAsString(args);
-            if (SettlementUtil.checkPermission(sender, permission.getAdminPermission(), false)) {
+            if (SettlementUtil.checkPermission(sender, permission, false, true)) {
                 Settlement target = Settlement.getSettlement(settlementName);
                 if (target == null) {
                     sender.sendMessage("§cThere is no settlement of that name!");

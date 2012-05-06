@@ -2,14 +2,11 @@ package net.zetaeta.settlement;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.Externalizable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +21,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -34,9 +32,17 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Settlement implements Externalizable, SettlementConstants, Comparable<Settlement> {
+/**
+ * Represents a settlement, a group of people with an owner and moderators.
+ * <p />
+ * If you haven't noticed, I am not very good at writing comprehensive javadocs.
+ * 
+ * @author Zetaeta
+ *
+ */
+public class Settlement implements SettlementConstants, Comparable<Settlement> {
 
-    public static Map<String, Settlement> settlementsByName = new TreeMap<String, Settlement>();
+    private static Map<String, Settlement> settlementsByName = new TreeMap<String, Settlement>();
     private static Map<Integer, Settlement> settlementsByUID = new HashMap<Integer, Settlement>();
     private static Map<World, Collection<Settlement>> settlementsByWorld;
     
@@ -72,13 +78,11 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
     /**
      * Standard settlement constructor
      * 
-     * @param owner Owner to assign to settlement
-     * 
-     * @param name Name of settlement
+     * @param owner Owner to assign to settlement. 
+     * @param name Name of settlement.
      * @param UID Unique ID for the Settlement.
-     * */
+     */
     public Settlement(SettlementPlayer owner, String name, int UID) {
-        SettlementPlugin.log.info("Settlement(), name = " + name + ", UID = " + UID);
         this.name = name;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
         this.ownerName = owner.getName();
@@ -86,16 +90,17 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         members.add(ownerName);
         onlineMembers.add(owner);
         this.UID = UID;
-        SettlementPlugin.log.info("InitialisedVars");
         settlementsByName.put(name, this);
         settlementsByUID.put(UID, this);
-        SettlementPlugin.log.info("MapsAdded");
-        SettlementPlugin.log.info(this.name);
         if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
             settlementsByWorld = new HashMap<World, Collection<Settlement>>();
         }
     }
     
+    /**
+     * @param name Settlement name.
+     * @param uid Unique ID for the settlement.
+     */
     public Settlement(String name, int uid) {
         this.name = name;
         this.UID = uid;
@@ -107,32 +112,77 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         }
     }
 
+    /**
+     * Gets the Settlement with the given name
+     * 
+     * @param name Name of the Settlement to get.
+     * @return Settlement with the given name, or null if no Settlement has that name.
+     */
     public static Settlement getSettlement(String name) {
         return settlementsByName.get(name);
     }
     
+    /**
+     * Gets the Settlement with the given unique ID.
+     * 
+     * @param uid UID of the Settlement to get.
+     * @return Settlement with the given UID, or null if none has it.
+     */
     public static Settlement getSettlement(int uid) {
         return settlementsByUID.get(uid);
     }
     
+    /**
+     * Gets a {@link java.util.Collection} of all Settlements currently loaded.
+     * 
+     * @return Collection of all Settlements.
+     */
     public static Collection<Settlement> getSettlements() {
         return settlementsByUID.values();
     }
     
+    /**
+     * Gets an ordered {@link Collection} of all Settlements currently loaded in alphabetical order of their name.
+     * 
+     * @return Ordered collection of Settlements
+     */
     public static Collection<Settlement> getOrderedSettlements() {
         return settlementsByName.values();
     }
     
+    /**
+     * Gets a {@link Collection} of all the Settlements that have plots in a given world.
+     * <p />
+     * WARNING: This method is <b>very</b> slow if {@link ConfigurationConstants#useSettlementWorldCacheing Settlement world cacheing} is disabled
+     * and should not be used unless absolutely necessary, especially in the main thread.
+     * 
+     * @param world {@link World} to get Settlements in.
+     * @return Collection of Settlements with plots in world.
+     */
     public static Collection<Settlement> getSettlementsIn(World world) {
-        return settlementsByWorld.get(world);
+        if (ConfigurationConstants.useSettlementWorldCacheing) {
+            return settlementsByWorld.get(world);
+        }
+        else {
+            Collection<Settlement> worldSets = new HashSet<Settlement>();
+            for (Settlement set : settlementsByUID.values()) {
+                for (Chunk chunk : set.getPlots()) {
+                    if (chunk.getWorld().equals(world)) {
+                        worldSets.add(set);
+                        break;
+                    }
+                }
+            }
+            return worldSets;
+        }
     }
     
-    public static void loadSettlement(Settlement settlement) {
-        settlementsByName.put(settlement.name, settlement);
-    }
-    
-    public static void loadSettlements() {
-        log.info("loadSettlements");
+    /**
+     * Loads all Settlements from ./Settlement/data/settlements.dat
+     * @return 
+     */
+    public static int loadSettlements() {
+        log.info("Loading Settlements...");
         File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
         if (!settlementsFile.exists()) {
             try {
@@ -141,23 +191,24 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
                 log.log(Level.SEVERE, "Could not create settlements.dat file!", e);
                 e.printStackTrace();
             }
-            return;
+            return 0;
         }
         DataInputStream dis = null;
         try {
             dis = new DataInputStream(new FileInputStream(settlementsFile));
         } catch (FileNotFoundException e) {
             log.severe("Could not open settlements.dat file!");
-            return;
+            return 0;
         }
         
-        
+        int count = 0;
         try {
             if (dis.available() > 0) {
                 int version = dis.readInt();
                 if (version == 0) {
                     while(dis.available() > 0) {
                         FlatFileIO.loadSettlementV0_0(dis);
+                        ++count;
                     }
                 }
                 else {
@@ -175,10 +226,14 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
                 e.printStackTrace();
             }
         }
+        return count;
     }
     
+    /**
+     * Saves all Settlements to ./Settlement/data/settlements.dat
+     */
     public static void saveSettlements() {
-        log.info("saveSettlements");
+        log.info("Saving Settlements...");
         File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
         if (!settlementsFile.exists()) {
             try {
@@ -194,6 +249,7 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
             dos = new DataOutputStream(new FileOutputStream(settlementsFile));
         } catch (FileNotFoundException e) {
             log.severe("Could not open settlements.dat file!");
+            return;
         }
         try {
             dos.writeInt(FlatFileIO.FILE_FORMAT_VERSION);
@@ -201,6 +257,8 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
             e1.printStackTrace();
         }
         for (Settlement settlement : settlementsByUID.values()) {
+            if (!settlement.shouldSave)
+                continue;
             try {
                 FlatFileIO.saveSettlementV0_0(settlement, dos);
             } catch (IOException e) {
@@ -210,6 +268,11 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         }
     }
     
+    /**
+     * Gets a random new Unique ID for creating a new Settlement, guaranteed to be different from the UID of any other current Settlement.
+     * 
+     * @return new random unique ID.
+     */
     public static int getNewUID() {
         System.out.println("getNewUID");
         Random uidGen = new Random();
@@ -222,23 +285,11 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
     }
     
     /**
-     * {@inheritDoc}
-     * */
-    @Override
-    public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * {@inheritDoc}
-     * */
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-
-    } 
-    
+     * Gets the Settlement's unique ID, which is guaranteed to be both unique to this settlement among all on the server and also be permanent,
+     * unlike its the name which can be changed.
+     * 
+     * @return Settlement's UID
+     */
     public int getUid() {
         return UID;
     }
@@ -276,43 +327,90 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
     
     /**
      * @return Settlement's owner.
-     * */
+     */
     public SettlementPlayer getOwner() { 
         return owner;
     }
     
     /**
      * @param newOwner New owner to assign to settlement.
-     * */
+     */
     public void setOwner(SettlementPlayer newOwner) { 
         owner = newOwner;
         ownerName = newOwner.getName();
     }
     
+    /**
+     * Gets the number of plots currently owned by the Settlement.
+     * 
+     * @return Number of plots owned.
+     */
     public int getPlotCount() {
         return plots.size();
     }
     
+    /**
+     * Gets the maximum number of plots this Settlement can currently own.
+     * <p />
+     * This is calculated by <code><bonus plot granted> + (<number of members> * {@link ConfigurationConstants#plotsPerPlayer <plots per player>})(</code>
+     * It is possible for a Settlement to have more plots than this, by claiming land while having more members, some of whom then leave.
+     *
+     * @return maximum allowed plots.
+     */
     public int getPlotLimit() {
         return allowedPlots;
     }
     
+    /**
+     * Gets the number of members currently online.
+     * 
+     * @return Number of members currently online.
+     */
     public int getOnlineMemberCount() {
         return onlineMembers.size();
     }
     
+    /**
+     * Gets the total number of members, online and offline.
+     * 
+     * @return Total member count.
+     */
     public int getMemberCount() {
         return members.size();
     }
     
+    /**
+     * Gets a {@link Collection} of all {@link Chunk Chunks} currently belonging to the Settlement.
+     * 
+     * @return Chunks owned by the Settlement.
+     */
+    public Collection<Chunk> getPlots() {
+        return plots;
+    }
+    
+    /**
+     * Gets a {@link Collection} of {@link SettlementPlayer SettlementPlayers} representing all currently online members.
+     * 
+     * @return All online members.
+     */
     public Collection<SettlementPlayer> getOnlineMembers() {
         return onlineMembers;
     }
     
+    /**
+     * Gets a {@link Collection} of the usernames of all the Settlement's moderators.
+     * 
+     * @return Moderators' names.
+     */
     public Collection<String> getModeratorNames() {
         return moderators;
     }
     
+    /**
+     * Gets a {@link Collection} of the usernames of all the Settlement's members.
+     * 
+     * @return Members' names.
+     */
     public Collection<String> getMemberNames() {
         return members;
     }
@@ -324,11 +422,7 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
      */
     public void addOnlinePlayer(SettlementPlayer sPlayer) {
         if (members.contains(sPlayer.getName())) {
-            log.info("Adding player " + sPlayer.getName());
             onlineMembers.add(sPlayer);
-        }
-        else {
-            log.info("Failed adding player " + sPlayer.getName());
         }
     }
     
@@ -356,12 +450,37 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         return plots.contains(chunk);
     }
     
+    /**
+     * Changes the name of the Settlement, broadcasting a message to Settlement members that the name has been changed.
+     * 
+     * @param newName New name to assign to the Settlement.
+     * @param cause {@link SettlementPlayer} that changed the name, to include in the broadcasted message.
+     */
+    public void changeName(String newName, SettlementPlayer cause) {
+        String oldName = name;
+        name = newName;
+        settlementsByName.remove(oldName);
+        settlementsByName.put(newName, this);
+        broadcastSettlementMessage("§b  " + cause.getName() + " §achanged the settlement's name to " + name);
+    }
+    
+    /**
+     * Broadcasts a message using {@link #sendMessage(CommandSender, String...)} to all currently online members.
+     * 
+     * @param message Message to send in {@link String} or String[] form.
+     */
     public void broadcastSettlementMessage(String... message) {
         for (SettlementPlayer sPlayer : onlineMembers) {
             sendMessage(sPlayer.getPlayer(), message);
         }
     }
     
+    /**
+     * Sends a message to the specified {@link CommandSender} "from the settlement", i.e titled with the settlement's name.
+     *
+     * @param target CommandSender to send the message to.
+     * @param message Message to send in {@link String} or String[] form.
+     */
     @SuppressWarnings("static-access")
     public void sendMessage(CommandSender target, String... message) {
         System.out.println(name);
@@ -370,10 +489,24 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         target.sendMessage(SettlementMessenger.SETTLEMENT_MESSAGE_END);
     }
     
+    /**
+     * Sends a standard message to the specified {@link CommandSender} telling them they do not have the rights to perform an action.
+     * <p />
+     * Used for internal Settlement modification situations, such as when a member tries to change the Settlement name.
+     *
+     * @param target CommandSender to send the message to.
+     */
     public void sendNoRightsMessage(CommandSender target) {
         sendMessage(target, "§cYou do not have sufficient rights to do this!");
     }
     
+    /**
+     * Sends the info message about the Settlement to the specified {@link CommandSender}.
+     * <p />
+     * Used for the {@link Info /settlement info} command.
+     * 
+     * @param target CommandSender to send the message to.
+     */
     @SuppressWarnings("static-access")
     public void sendInfoMessage(CommandSender target) {
         List<String> info = new ArrayList<String>();
@@ -383,21 +516,32 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
             info.add(SettlementUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
         }
         info.add("§2  Plots: " + plots.size() + '/' + allowedPlots);
-        info.add(getColouredPlayerList());
+        info.add(getColouredPlayerList("§a", "§c"));
         sendMessage(target, info.toArray(new String[info.size()]));
     }
     
-    private String getColouredPlayerList() {
+    /**
+     * Gets a coloured String list of all players in the Settlement, with online players coloured separately to offline ones.
+     * <p />
+     * Used, for example, in {@link #sendInfoMessage(CommandSender)} in the form <code>getColouredPlayerList("§a", "§c")</code>.
+     * 
+     * @param onlineColour Colour to colour online players' names with, in standard Minecraft string form using "§".
+     * @param offlineColour Colour to colour offline players' names with, in standard Minecraft string form using "§".
+     * 
+     * @return Coloured player list as a String.
+     */
+    @SuppressWarnings("static-access")
+    public String getColouredPlayerList(String onlineColour, String offlineColour) {
         if (updatePLCache || playerListCache == null) {
             String[] plArray = new String[members.size()];
             int i = 0;
             for (Iterator<String> listIt = members.iterator(); listIt.hasNext(); ++i) {
                 String name = listIt.next();
                 if (SettlementPlayer.getSettlementPlayer(name) != null) {
-                    plArray[i] = "§a" + name;
+                    plArray[i] = onlineColour + name;
                 }
                 else {
-                    plArray[i] = "§c" + name;
+                    plArray[i] = offlineColour + name;
                 }
             }
             return SettlementUtil.concatString(15 + (members.size() * 18), "§2 Players: ", SettlementUtil.arrayAsCommaString(plArray), ".");
@@ -424,10 +568,20 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         }
     }
     
+    /**
+     * Updates the current allowed number of plots for the Settlement to own.
+     * <p />
+     * This is calculated by <code>{@literal <bonus plot granted> + (<number of members> * }{@link ConfigurationConstants#plotsPerPlayer})</code>
+     */
     public void updateClaimablePlots() {
         allowedPlots = bonusPlots + (members.size() * ConfigurationConstants.plotsPerPlayer);
     }
     
+    /**
+     * Adds a member to the Settlement, updating the number of claimable plots aswell.
+     *
+     * @param newMember SettlementPlayer to add.
+     */
     public void addMember(SettlementPlayer newMember) {
         onlineMembers.add(newMember);
         if (newMember.getData(this) == null) {
@@ -437,20 +591,43 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         updateClaimablePlots();
     }
     
+    /**
+     * Checks whether the given {@link SettlementPlayer} is a member of the Settlement.
+     *
+     * @param sPlayer SettlementPlayer to check membership of.
+     * @return <code>true</code> if <code>sPlayer</code> is a member of the Settlement, <code>false</code> otherwise.
+     */
     public boolean isMember(SettlementPlayer sPlayer) {
         return onlineMembers.contains(sPlayer);
     }
     
+    /**
+     * Checks whether the online or offline player with the given name is a member of the Settlement.
+     *
+     * @param sPlayerName Name of the player to check membership.
+     * @return Whether the player is a member of the Settlement.
+     */
     public boolean isMember(String sPlayerName) {
         return members.contains(sPlayerName);
     }
     
+    /**
+     * Removes an online member from the Settlement.
+     *
+     * @param oldMember SettlementPlayer to remove.
+     */
     public void removeMember(SettlementPlayer oldMember) {
         onlineMembers.remove(oldMember);
         oldMember.removeSettlement(this);
         updateClaimablePlots();
     }
     
+    /**
+     * Updates the members in the overall member list.
+     * <p />
+     * As the owner's name, moderators' names and members' names are stored separately in the file,
+     * this must be called after loading to update the contents of the overall member list.
+     */
     public void updateMembers() {
         for (String bName : baseMembers) {
             members.add(bName);
@@ -531,8 +708,6 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         public static final int FILE_FORMAT_VERSION = 0;
         
         public static void saveSettlementV0_0(Settlement set, DataOutputStream dos) throws IOException {
-            System.out.println("saveSettlementV0_0: " + set.getName());
-            log.info("UID: " + set.UID);
             dos.writeInt(set.UID);
             dos.writeUTF(set.name);
             dos.writeUTF(set.slogan);
@@ -645,7 +820,6 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
         
         public static Settlement loadSettlementV0_0(DataInputStream dis) throws IOException {
             int uid = dis.readInt();
-            log.info("UID: " + uid);
             String name = dis.readUTF();
             Settlement set = new Settlement(name, uid);
             set.slogan = dis.readUTF();
@@ -709,7 +883,6 @@ public class Settlement implements Externalizable, SettlementConstants, Comparab
             dis.readChar(); // \n
             set.updateMembers();
             set.updateClaimablePlots();
-            log.info("Loaded Settlement " + set.name);
             return set;
         }
     }
