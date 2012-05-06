@@ -1,10 +1,8 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementData;
 import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementRank;
 import net.zetaeta.settlement.commands.SettlementCommand;

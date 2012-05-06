@@ -1,6 +1,7 @@
 package net.zetaeta.settlement.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import net.zetaeta.libraries.ZPUtil;
@@ -98,6 +99,14 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
                 }
             }
             return null;
+        }
+    }
+    
+    public static void clearFromChunkCache(Settlement settlement) {
+        for (Iterator<Settlement> setIt = settlementCache.values().iterator(); setIt.hasNext();) {
+            if (setIt.next().equals(settlement)) {
+                setIt.remove();
+            }
         }
     }
 }

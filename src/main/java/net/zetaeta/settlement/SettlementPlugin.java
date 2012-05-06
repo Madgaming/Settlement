@@ -23,7 +23,7 @@ public class SettlementPlugin extends ManagedJavaPlugin {
     
     public static Logger log;
     public static SettlementPlugin plugin;
-    public static ExecutorService settlementThreadPool = Executors.newCachedThreadPool();
+//    public static ExecutorService settlementThreadPool = Executors.newCachedThreadPool();
     private PluginManager pm;
     public FileConfiguration config;
     public CommandsManager commandsManager;
@@ -58,7 +58,8 @@ public class SettlementPlugin extends ManagedJavaPlugin {
         log = getLogger();
         plugin = this;
         log.info("LOADING...");
-        Future<?> settlementLoader = settlementThreadPool.submit(new Runnable() {
+        SettlementThreadManager.init();
+        Future<?> settlementLoader = SettlementThreadManager.submitAsyncTask(new Runnable() {
             public void run() {
                 int settlementCount = Settlement.loadSettlements();
                 log.info("Loaded" + settlementCount + "Settlements!");

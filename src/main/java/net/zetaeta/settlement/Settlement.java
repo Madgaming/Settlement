@@ -603,7 +603,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * */
     public void delete() {
         settlementsByName.remove(name);
-        settlementsByUID.remove(name);
+        settlementsByUID.remove(UID);
         if (settlementsByWorld != null) {
             settlementsByWorld.remove(name);
         }
@@ -615,6 +615,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
                 sPlayer.setFocus(null);
             }
         }
+        SettlementUtil.clearFromChunkCache(this);
     }
     
     /**
