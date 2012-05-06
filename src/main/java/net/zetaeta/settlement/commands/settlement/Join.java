@@ -33,7 +33,7 @@ public class Join extends SettlementCommand {
     @SuppressWarnings("static-access")
     @Override
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        CommandArguments parsedArgs = CommandArguments.processArguments(alias, args, new String[] {"silent"}, new String[0]);
+        CommandArguments parsedArgs = CommandArguments.processArguments(alias, args, new String[] {"silent"}, new String[] {"settlement"});
         if (parsedArgs == null) {
             SettlementMessenger.sendSettlementMessage(sender, "§c  Your command could not be parsed!");
             return true;
@@ -42,9 +42,9 @@ public class Join extends SettlementCommand {
             return true;
         }
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-        Settlement target = SettlementUtil.getFocusedOrStated(sPlayer, args, true);
+        Settlement target = SettlementUtil.getFocusedOrStated(sPlayer, parsedArgs);
         if (target == null) {
-            sender.sendMessage("§c Invalid settlement §6" + SettlementUtil.arrayAsString(args));
+            SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
         if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".join", false, true)) {

@@ -36,22 +36,22 @@ public class Leave extends SettlementCommand {
         if (!SettlementUtil.checkCommandValid(sender, permission)) {
             return true;
         }
-        CommandArguments arguments = CommandArguments.processArguments(alias, args, new String[] {"silent", "s"}, new String[0], sender);
+        CommandArguments arguments = CommandArguments.processArguments(alias, args, new String[] {"silent", "s"}, new String[] {"settlement"});
         if (arguments == null)
             return true;
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-        Settlement from = SettlementUtil.getFocusedOrStated(sPlayer, arguments.getUnprocessedArgArray(), true);
+        Settlement from = SettlementUtil.getFocusedOrStated(sPlayer, arguments);
         if (from == null) {
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".leave", false, true)) {
-            if (arguments.hasBooleanFlag("silent") || arguments.hasBooleanFlag("s")) {
-                from.removeMember(sPlayer);
-                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(40 + 16, "  §a  You left the Settlement §6", from.getName(), " §asilently"));
-                return true;
-            }
-        }
         if (from.isMember(sPlayer)) {
+            if (SettlementUtil.checkPermission(sender, ADMIN_BASIC_PERMISSION + ".leave", false, true)) {
+                if (arguments.hasBooleanFlag("silent") || arguments.hasBooleanFlag("s")) {
+                    from.removeMember(sPlayer);
+                    SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(40 + 16, "  §a  You left the Settlement §6", from.getName(), " §asilently"));
+                    return true;
+                }
+            }
             from.removeMember(sPlayer);
             SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(40 + 16, "  §a  You left the Settlement §6", from.getName(), " §a!"));
             from.broadcastSettlementMessage(SettlementUtil.concatString(0, "  §b", sPlayer.getName(), " §aleft the Settlement!"));
