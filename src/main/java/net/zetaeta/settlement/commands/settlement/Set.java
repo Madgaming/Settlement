@@ -14,11 +14,13 @@ import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Set extends SettlementCommand implements LocalCommandExecutor, SettlementConstants {
     public static final String SET_PERMISSION = OWNER_PERMISSION +  ".set";
+    public static final String SET_ADMIN_PERMISSION = ADMIN_OWNER_PERMISSION + ".set";
     
     public Set(LocalCommand parent) {
         super(parent);
@@ -146,5 +148,37 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
         else {
             return false;
         }
+    }
+    
+    @SuppressWarnings("static-access")
+    @Command(usage = {"§2 - /settlement set spawn [settlement]:",
+                      "§a  \u00bbSet the settlement's spawn to your current location"},
+            shortUsage = {"§2 - /settlement set spawn:",
+                    "§a  \u00bbSet a settlement's spawn."},
+            aliases = {"spawn", "home"},
+            valueFlags = {"settlement"},
+            permission = SET_PERMISSION + ".spawn",
+            playersOnly = true
+    )
+    public boolean setSpawn(CommandSender sender, CommandArguments args) {
+        Player player = (Player) sender;
+        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(player);
+        Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
+        if (settlement == null) {
+            SettlementMessenger.sendInvalidSettlementMessage(sender);
+            return true;
+        }
+        if (SettlementUtil.checkPermission(sender, SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+            if (!settlement.equals(SettlementUtil.getOwner(player.getLocation().getChunk()))) {
+                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
+                return true;
+            }
+            Location loc = player.getLocation();
+            settlement.setSpawn(loc);
+            SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(125, "§b  You §aset the spawn of §6", settlement.getName(), "§a to x=", loc.getBlockX(), ", y=", loc.getBlockY(), ", z=", loc.getBlockZ(), " in world ", loc.getWorld().getName(), "!"));
+            return true;
+        }
+        settlement.sendNoRightsMessage(sender);
+        return true;
     }
 }
