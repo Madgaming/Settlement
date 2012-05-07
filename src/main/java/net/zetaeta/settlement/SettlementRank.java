@@ -4,7 +4,7 @@ package net.zetaeta.settlement;
 public enum SettlementRank {
     OUTSIDER(0, ConfigurationConstants.outsiderName),
     MEMBER(1, ConfigurationConstants.memberName), 
-    MOD(2, ConfigurationConstants.modName), 
+    MODERATOR(2, ConfigurationConstants.modName), 
     OWNER(3, ConfigurationConstants.ownerName);
     
     private int priority;
@@ -38,7 +38,7 @@ public enum SettlementRank {
         case 1 :
             return MEMBER;
         case 2 :
-            return MOD;
+            return MODERATOR;
         case 3 :
             return OWNER;
         default :

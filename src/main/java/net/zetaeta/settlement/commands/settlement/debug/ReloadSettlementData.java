@@ -24,14 +24,14 @@ public class ReloadSettlementData extends SettlementCommand {
         for (Settlement settlement : Settlement.getSettlements()) {
             for (SettlementPlayer player : settlement.getOnlineMembers()) {
                 if (player.getData(settlement) == null) {
-                    player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MOD : SettlementRank.MEMBER))));
+                    player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MODERATOR : SettlementRank.MEMBER))));
                 }
             }
             for (String plNm : settlement.getMemberNames()) {
                 SettlementPlayer player;
                 if ((player = SettlementPlayer.getSettlementPlayer(plNm)) != null) {
                     if (player.getData(settlement) == null) {
-                        player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MOD : SettlementRank.MEMBER))));
+                        player.addData(new SettlementData(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MODERATOR : SettlementRank.MEMBER))));
                     }
                 }
             }

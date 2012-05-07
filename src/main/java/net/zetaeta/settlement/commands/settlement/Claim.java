@@ -41,7 +41,7 @@ public class Claim extends SettlementCommand {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".claim", false, true) || sPlayer.getRank(set).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+        if (SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".claim", false, true) || sPlayer.getRank(set).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
             set.claimLand((Player) sender);
             return true;
         }

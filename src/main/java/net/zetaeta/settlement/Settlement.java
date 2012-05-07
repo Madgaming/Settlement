@@ -465,6 +465,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         moderators.add(name);
     }
     
+    public void addModerator(SettlementPlayer sPlayer) {
+        baseMembers.remove(sPlayer.getName());
+        moderators.add(sPlayer.getName());
+        if (sPlayer.getData(this) != null) {
+            sPlayer.getData(this).setRank(SettlementRank.MODERATOR);
+        }
+    }
+    
     /**
      * Adds a player to the Settlement's internal list of who's online.
      * 
@@ -635,6 +643,8 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      */
     public void addMember(SettlementPlayer newMember) {
         onlineMembers.add(newMember);
+        baseMembers.add(newMember.getName());
+        members.add(newMember.getName());
         if (newMember.getData(this) == null) {
             SettlementData data = new SettlementData(this, SettlementRank.MEMBER);
             newMember.addData(data);
@@ -668,6 +678,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      */
     public boolean isMember(String sPlayerName) {
         return members.contains(sPlayerName);
+    }
+    
+    public boolean isModerator(SettlementPlayer sPlayer) {
+        return moderators.contains(sPlayer.getName());
+    }
+    
+    public boolean isModerator(String sPlayerName) {
+        return moderators.contains(sPlayerName);
     }
     
     /**

@@ -2,10 +2,11 @@ package net.zetaeta.settlement.util;
 
 import net.zetaeta.settlement.ConfigurationConstants;
 import net.zetaeta.settlement.Settlement;
+import net.zetaeta.settlement.SettlementConstants;
 
 import org.bukkit.command.CommandSender;
 
-public class SettlementMessenger {
+public class SettlementMessenger implements SettlementConstants {
 
     public static final String SETTLEMENT_MESSAGE_START_LEFT = "§2=========:";
 
@@ -36,8 +37,8 @@ public class SettlementMessenger {
     public static final String SETTLEMENT_USAGE_END = SETTLEMENT_MESSAGE_END;
     
     public static final String[] SETTLEMENT_GLOBAL_INFO = {
-        "§2  Author: §bZetaeta",
-        "§2  Version: §60.1"
+        "§2  Author: §b" + plugin.getDescription().getAuthors().get(0),
+        "§2  Version: §6" + plugin.getDescription().getVersion()
     };
     
     public static final int LEFT_ALIGN = 0x01;
@@ -77,9 +78,24 @@ public class SettlementMessenger {
      * @param target CommandSender to send the message to.
      */
     public static void sendInvalidSettlementMessage(CommandSender target) {
-        target.sendMessage(SETTLEMENT_MESSAGE_START);
-        target.sendMessage("§c  That is not a valid Settlement's name!");
-        target.sendMessage(SETTLEMENT_MESSAGE_END);
+        synchronized (target) {
+            target.sendMessage(SETTLEMENT_MESSAGE_START);
+            target.sendMessage("§c  That is not a valid settlement's name!");
+            target.sendMessage(SETTLEMENT_MESSAGE_END);
+        }
+    }
+    
+    /**
+     * Sends a "no player of that name" message to the target.
+     *
+     * @param target CommandSender to send message to.
+     */
+    public static void sendInvalidPlayerMessage(CommandSender target) {
+        synchronized (target) {
+            target.sendMessage(SETTLEMENT_MESSAGE_START);
+            target.sendMessage("§c  There is no player of that name!");
+            target.sendMessage(SETTLEMENT_MESSAGE_END);
+        }
     }
     
     /**
@@ -88,9 +104,11 @@ public class SettlementMessenger {
      * @param target CommandSender to send the message to.
      */
     public static void sendNoFocusMessage(CommandSender target) {
-        target.sendMessage(SETTLEMENT_MESSAGE_START);
-        target.sendMessage("§c  You do not have a Settlement in your focus!");
-        target.sendMessage(SETTLEMENT_MESSAGE_END);
+        synchronized (target) {
+            target.sendMessage(SETTLEMENT_MESSAGE_START);
+            target.sendMessage("§c  You do not have a Settlement in your focus!");
+            target.sendMessage(SETTLEMENT_MESSAGE_END);
+        }
     }
     
     public static void sendGlobalSettlementInfo(CommandSender target) {

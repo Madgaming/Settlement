@@ -55,7 +55,7 @@ public class Spawn implements LocalCommandExecutor {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+        if (SettlementUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
             if (!settlement.equals(SettlementUtil.getOwner(player.getLocation().getChunk()))) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
                 return true;

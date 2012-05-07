@@ -250,7 +250,7 @@ public final class FlatFileIO implements SettlementConstants {
         case 1 :
             return new SettlementData(set, SettlementRank.MEMBER, title);
         case 2 :
-            return new SettlementData(set, SettlementRank.MOD, title);
+            return new SettlementData(set, SettlementRank.MODERATOR, title);
         case 3 :
             return new SettlementData(set, SettlementRank.OWNER, title);
         default :

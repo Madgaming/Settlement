@@ -61,7 +61,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
             if (sPlayer.getFocus() != null) {
                 Settlement target = sPlayer.getFocus();
-                if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.MOD) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
+                if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.MODERATOR) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
                     String slogan = SettlementUtil.arrayAsString(args.getUnprocessedArgArray());
                     target.setSlogan(slogan);
                     target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
@@ -96,7 +96,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             sender.sendMessage("§cThere is no Settlement of that name!");
             return true;
         }
-        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
             target.setSlogan(slogan);
             target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
         }
@@ -126,7 +126,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             return true;
         }
         if (args.hasFlagValue("name")) {
-            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
                 settlement.changeName(args.getFlagValue("name"), sPlayer);
                 return true;
             }
@@ -136,7 +136,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             }
         }
         else if (!settlement.getName().equalsIgnoreCase(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()))) {
-            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
                 settlement.changeName(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()), sPlayer);
                 return true;
             }
@@ -158,7 +158,8 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             aliases = {"spawn", "home"},
             valueFlags = {"settlement"},
             permission = SET_PERMISSION + ".spawn",
-            playersOnly = true
+            playersOnly = true,
+            checkPermissions = true
     )
     public boolean setSpawn(CommandSender sender, CommandArguments args) {
         Player player = (Player) sender;
@@ -168,7 +169,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MOD)) {
+        if (SettlementUtil.checkPermission(sender, SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
             if (!settlement.equals(SettlementUtil.getOwner(player.getLocation().getChunk()))) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
                 return true;
