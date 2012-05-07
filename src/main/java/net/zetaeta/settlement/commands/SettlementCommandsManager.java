@@ -31,6 +31,7 @@ import net.zetaeta.settlement.commands.settlement.Leave;
 import net.zetaeta.settlement.commands.settlement.List;
 import net.zetaeta.settlement.commands.settlement.Moderator;
 import net.zetaeta.settlement.commands.settlement.Spawn;
+import net.zetaeta.settlement.commands.settlement.Unclaim;
 import net.zetaeta.settlement.commands.settlement.Usage;
 import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -46,12 +47,10 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     private String[] shortUsage;
     public static SettlementCommandsManager settlementCommandsManager;
     
-    
-    {
+    public SettlementCommandsManager() {
+        settlementCommandsManager = this;
         usage = new String[] {"settlement"};
-    }
-    
-    {
+        
         registerSubCommand(new Bypass(this));
         registerSubCommand(new Claim(this));
         registerSubCommand(new Confirm(this));
@@ -67,13 +66,10 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Moderator(this));
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
         registerSubCommands(new Spawn());
+        registerSubCommand(new Unclaim(this));
         registerSubCommand(new Usage(this));
         
         registerSubCommand(new Debug(this));
-    }
-    
-    public SettlementCommandsManager() {
-        settlementCommandsManager = this;
     }
     
     /**
