@@ -82,7 +82,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      */
     public Settlement(SettlementPlayer owner, String name, int UID) {
         this.name = name;
-        slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
+        slogan = "§e  Use /settlement set slogan <slogan> to set the slogan!";
         this.ownerName = owner.getName();
         this.owner = owner;
         members.add(ownerName);
@@ -473,6 +473,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         }
     }
     
+    public void removeModerator(SettlementPlayer sPlayer) {
+        moderators.remove(sPlayer.getName());
+        baseMembers.add(sPlayer.getName());
+        if (sPlayer.getData(this) != null) {
+            sPlayer.getData(this).setRank(SettlementRank.MEMBER);
+        }
+    }
+    
     /**
      * Adds a player to the Settlement's internal list of who's online.
      * 
@@ -569,7 +577,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public void sendInfoMessage(CommandSender target) {
         List<String> info = new ArrayList<String>();
         info.add("§2 - §a".concat(slogan == null ? "null" : slogan));
-        info.add("§2 Owner: ".concat(owner == null ? (getOwnerName() == null ? "owner&name = null" : getOwnerName()) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
+        info.add("§2 Owner: ".concat(owner == null ? (ownerName == null ? "owner&name = null" : ownerName) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
         if (moderators.size() > 0) {
             info.add(SettlementUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
         }
@@ -633,7 +641,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * This is calculated by <code>{@literal <bonus plot granted> + (<number of members> * }{@link ConfigurationConstants#plotsPerPlayer})</code>
      */
     public void updateClaimablePlots() {
-        allowedPlots = getBonusPlots() + (members.size() * ConfigurationConstants.plotsPerPlayer);
+        allowedPlots = bonusPlots + (members.size() * ConfigurationConstants.plotsPerPlayer);
     }
     
     /**
@@ -778,6 +786,9 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         return invitations.contains(spName);
     }
     
+    public String toString() {
+        return "All members: " + members + "; Base members: " + baseMembers + "; Moderators: " + moderators + "; Owner: " + ownerName;
+    }
 
     @Override
     public int compareTo(Settlement other) {

@@ -158,19 +158,24 @@ public final class FlatFileIO implements SettlementConstants {
         String ownerName = dis.readUTF();
         set.setOwnerName(ownerName);
         
-//        dis.readChar(); // {
         char c = dis.readChar();
         while (c != '|' && c != '}') {
             set.addModerator(dis.readUTF());
+            dis.readChar();
             c = dis.readChar();
         } // }
-//        dis.readChar(); // {
-        c = dis.readChar();
+        c = dis.readChar(); // | or {
+        log.info("About to read members, char = " + String.valueOf(c));
         while (c != '|' && c != '}') {
-            set.addMember(dis.readUTF());
+            String s = dis.readUTF();
+            log.info("Adding member: " + s);
+            set.addMember(s);
             c = dis.readChar();
+            log.info("Reading members, char = " + String.valueOf(c));
+            c = dis.readChar();
+            log.info("Reading members, char = " + String.valueOf(c));
         } // }
-        c = dis.readChar();
+        c = dis.readChar(); // | or {
         while (c != '|' && c != '}') { // Worlds
             c = dis.readChar(); // { / |
             if (c == '|') {

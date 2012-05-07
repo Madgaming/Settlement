@@ -99,11 +99,12 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
         if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
             target.setSlogan(slogan);
             target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
+            return true;
         }
         else {
             target.sendNoRightsMessage(sender);
+            return true;
         }
-        return true;
     }
     
     @SuppressWarnings("static-access")
