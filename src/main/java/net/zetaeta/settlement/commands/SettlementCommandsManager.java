@@ -18,7 +18,7 @@ import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.settlement.Bypass;
-import net.zetaeta.settlement.commands.settlement.Claim;
+import net.zetaeta.settlement.commands.settlement.Claims;
 import net.zetaeta.settlement.commands.settlement.Confirm;
 import net.zetaeta.settlement.commands.settlement.Create;
 import net.zetaeta.settlement.commands.settlement.Delete;
@@ -31,7 +31,6 @@ import net.zetaeta.settlement.commands.settlement.Leave;
 import net.zetaeta.settlement.commands.settlement.List;
 import net.zetaeta.settlement.commands.settlement.Moderator;
 import net.zetaeta.settlement.commands.settlement.Spawn;
-import net.zetaeta.settlement.commands.settlement.Unclaim;
 import net.zetaeta.settlement.commands.settlement.Usage;
 import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -52,7 +51,8 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         usage = new String[] {"settlement"};
         
         registerSubCommand(new Bypass(this));
-        registerSubCommand(new Claim(this));
+//        registerSubCommand(new Claim(this));
+        registerSubCommands(new Claims());
         registerSubCommand(new Confirm(this));
         registerSubCommand(new Create(this));
         registerSubCommand(new Delete(this));
@@ -66,7 +66,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Moderator(this));
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
         registerSubCommands(new Spawn());
-        registerSubCommand(new Unclaim(this));
+//        registerSubCommand(new Unclaim(this));
         registerSubCommand(new Usage(this));
         
         registerSubCommand(new Debug(this));
