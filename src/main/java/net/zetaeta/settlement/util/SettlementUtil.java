@@ -109,4 +109,8 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
             }
         }
     }
+    
+    public static void clearFromChunkCache(Chunk chunk) {
+        settlementCache.remove(chunk);
+    }
 }

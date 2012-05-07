@@ -755,6 +755,20 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         return true;
     }
     
+    @SuppressWarnings("static-access")
+    public boolean unclaimLand(Player cause) {
+        Chunk chunk = cause.getLocation().getChunk();
+        Settlement prevOwner = SettlementUtil.getOwner(chunk);
+        if (!this.equals(prevOwner)) {
+            SettlementMessenger.sendSettlementMessage(cause, "§a  This plot does not belong to you!");
+            return false;
+        }
+        plots.remove(chunk);
+        SettlementUtil.clearFromChunkCache(chunk);
+        broadcastSettlementMessage(SettlementUtil.concatString("§a  ", cause.getName(), " unclaimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
+        return true;
+    }
+    
     public boolean addChunk(Chunk chunk) {
         plots.add(chunk);
         if (ConfigurationConstants.useSettlementWorldCacheing) {
