@@ -18,9 +18,11 @@ public class SettlementCommand extends AbstractLocalCommandExecutor implements S
     public static final String MASTER_PERMISSION = "settlement";
     public static final String BASIC_PERMISSION = MASTER_PERMISSION + ".basic";
     public static final String OWNER_PERMISSION = MASTER_PERMISSION + ".owner";
+    public static final String PLOT_PERMISSION = MASTER_PERMISSION + ".plot";
     public static final String ADMIN_PERMISSION = MASTER_PERMISSION + ".admin";
     public static final String ADMIN_BASIC_PERMISSION = ADMIN_PERMISSION + ".basic";
     public static final String ADMIN_OWNER_PERMISSION = ADMIN_PERMISSION + ".owner";
+    public static final String ADMIN_PLOT_PERMISSION = ADMIN_PERMISSION + ".plot";
     
     protected String permission;
     

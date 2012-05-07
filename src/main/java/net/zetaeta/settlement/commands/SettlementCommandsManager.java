@@ -84,7 +84,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
      * @param args Arguments passed to the command in array form.
      * 
      * @return Whether command completes (unused).
-     * */
+     */
     
     @net.zetaeta.libraries.commands.Command(value = "settlement",
                                             aliases = {"s", "set"},
