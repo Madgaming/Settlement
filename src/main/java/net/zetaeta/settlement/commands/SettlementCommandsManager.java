@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.management.Descriptor;
+
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
@@ -40,18 +42,14 @@ import org.bukkit.command.CommandSender;
 
 public class SettlementCommandsManager extends DynamicCommandExecutor implements LocalCommand, SettlementConstants {
     
-    private final String[] aliases = {};
+    private final String[] aliases = {"settlement", "set", "s"};
     private Map<String, LocalCommand> subCommands = new HashMap<String, LocalCommand>();
     private String[] usage;
     private String[] shortUsage;
-    public static SettlementCommandsManager settlementCommandsManager;
     
-    
-    {
+    public SettlementCommandsManager() {
         usage = new String[] {"settlement"};
-    }
-    
-    {
+        
         registerSubCommand(new Bypass(this));
         registerSubCommand(new Claim(this));
         registerSubCommand(new Confirm(this));
@@ -72,10 +70,6 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Debug(this));
     }
     
-    public SettlementCommandsManager() {
-        settlementCommandsManager = this;
-    }
-    
     /**
      * Runs the standard settlement command (/settlement) and all possible arguments that follow it.
      * 
@@ -90,7 +84,11 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
      * @return Whether command completes (unused).
      * */
     
-    @net.zetaeta.libraries.commands.Command("settlement")
+    @net.zetaeta.libraries.commands.Command(value = "settlement",
+                                            aliases = {"s", "set"},
+                                            usage = "",
+                                            description = ""
+            )
     public boolean settlementCommand(CommandSender sender, Command command, String cmdlbl, String[] args) {
         if (args.length >= 1) {
             if (subCommands.containsKey(args[0].toLowerCase())) {
