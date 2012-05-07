@@ -85,11 +85,12 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
         this.ownerName = owner.getName();
         this.owner = owner;
-        members.add(getOwnerName());
+        members.add(ownerName);
         onlineMembers.add(owner);
         this.UID = UID;
         settlementsByName.put(name, this);
         settlementsByUID.put(UID, this);
+        allowedPlots = ConfigurationConstants.plotsPerPlayer;
         if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
             settlementsByWorld = new HashMap<World, Collection<Settlement>>();
         }
