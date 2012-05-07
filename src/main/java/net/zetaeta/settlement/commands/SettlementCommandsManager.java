@@ -17,6 +17,7 @@ import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
 import net.zetaeta.settlement.SettlementConstants;
+import net.zetaeta.settlement.commands.settlement.Bypass;
 import net.zetaeta.settlement.commands.settlement.Claim;
 import net.zetaeta.settlement.commands.settlement.Confirm;
 import net.zetaeta.settlement.commands.settlement.Create;
@@ -51,6 +52,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
     }
     
     {
+        registerSubCommand(new Bypass(this));
         registerSubCommand(new Claim(this));
         registerSubCommand(new Confirm(this));
         registerSubCommand(new Create(this));

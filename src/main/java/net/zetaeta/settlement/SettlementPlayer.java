@@ -41,6 +41,7 @@ public class SettlementPlayer implements SettlementConstants {
     private Settlement focus;
     private Runnable confirmable;
     private boolean confirmTimedOut = true;
+    private boolean bypass;
     
     
     public SettlementPlayer(Player plr) {
@@ -56,7 +57,6 @@ public class SettlementPlayer implements SettlementConstants {
             return SettlementPlayer.playerMap.get(player);
         SettlementPlayer sp = new SettlementPlayer(player);
         sp.register();
-        addNewPlayer(player, sp);
         return sp;
     }
     
@@ -173,18 +173,6 @@ public class SettlementPlayer implements SettlementConstants {
         }
     }
     
-    /**
-     * Registers a new player who has logged in on the first time.
-     * 
-     * @param player Player to be added
-     * 
-     * @param sPlayer SettlementPlayer object to save as.
-     * */
-    public static void addNewPlayer(Player player, SettlementPlayer sPlayer) {
-        playerMap.put(player, sPlayer);
-        newPlayers.add(sPlayer);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o instanceof SettlementPlayer) {
@@ -195,7 +183,7 @@ public class SettlementPlayer implements SettlementConstants {
 
     @Override
     public int hashCode() {
-        return 31 * player.hashCode();
+        return 3 * player.hashCode();
     }
     
     public Player getPlayer() {
@@ -247,7 +235,7 @@ public class SettlementPlayer implements SettlementConstants {
      * 
      * @param data SettlementData to be associated.
      * */
-    public void addData(SettlementData data) {
+    protected void addData(SettlementData data) {
          settlementsInfo.add(data);
     }
     
@@ -258,7 +246,7 @@ public class SettlementPlayer implements SettlementConstants {
      * 
      * @return SettlementData associated with the settlement.
      */
-    public SettlementData getData(Settlement settlement) {
+    protected SettlementData getData(Settlement settlement) {
         for (SettlementData data : settlementsInfo) {
             if (data.getSettlement().equals(settlement)) {
                 return data;
@@ -283,7 +271,7 @@ public class SettlementPlayer implements SettlementConstants {
         return null;
     }
     
-    public Collection<SettlementData> getData() {
+    protected Collection<SettlementData> getData() {
         return settlementsInfo;
     }
     
@@ -325,6 +313,9 @@ public class SettlementPlayer implements SettlementConstants {
     public void setRank(Settlement settlement, SettlementRank rank) {
         if (getData(settlement) != null) {
             getData(settlement).setRank(rank);
+        }
+        else {
+            addData(new SettlementData(settlement, rank));
         }
     }
     
@@ -373,4 +364,11 @@ public class SettlementPlayer implements SettlementConstants {
         return confirmTimedOut;
     }
     
+    public boolean hasBypass() {
+        return bypass;
+    }
+    
+    public void setBypass(boolean bypass) {
+        this.bypass = bypass;
+    }
 }

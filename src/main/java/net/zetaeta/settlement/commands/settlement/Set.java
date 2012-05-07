@@ -65,6 +65,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
                     String slogan = SettlementUtil.arrayAsString(args.getUnprocessedArgArray());
                     target.setSlogan(slogan);
                     target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
+                    return true;
                 }
                 else {
                     target.sendNoRightsMessage(sender);

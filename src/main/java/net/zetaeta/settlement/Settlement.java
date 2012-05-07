@@ -468,17 +468,13 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public void addModerator(SettlementPlayer sPlayer) {
         baseMembers.remove(sPlayer.getName());
         moderators.add(sPlayer.getName());
-        if (sPlayer.getData(this) != null) {
-            sPlayer.getData(this).setRank(SettlementRank.MODERATOR);
-        }
+        sPlayer.setRank(this, SettlementRank.MODERATOR);
     }
     
     public void removeModerator(SettlementPlayer sPlayer) {
         moderators.remove(sPlayer.getName());
         baseMembers.add(sPlayer.getName());
-        if (sPlayer.getData(this) != null) {
-            sPlayer.getData(this).setRank(SettlementRank.MEMBER);
-        }
+        sPlayer.setRank(this, SettlementRank.MEMBER);
     }
     
     /**
@@ -653,10 +649,11 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         onlineMembers.add(newMember);
         baseMembers.add(newMember.getName());
         members.add(newMember.getName());
-        if (newMember.getData(this) == null) {
-            SettlementData data = new SettlementData(this, SettlementRank.MEMBER);
-            newMember.addData(data);
-        }
+//        if (newMember.getData(this) == null) {
+//            SettlementData data = new SettlementData(this, SettlementRank.MEMBER);
+//            newMember.addData(data);
+//        }
+        newMember.setRank(this, SettlementRank.MEMBER);
         updateClaimablePlots();
     }
     

@@ -62,7 +62,7 @@ public class Create extends SettlementCommand {
             return true;
         }
         Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(args), Settlement.getNewUID());
-        sPlayer.addData(new SettlementData(settlement, SettlementRank.OWNER));
+        sPlayer.setRank(settlement, SettlementRank.OWNER);
         settlement.broadcastSettlementMessage("§a  Settlement Created!");
         return true;
     }
