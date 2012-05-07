@@ -58,7 +58,7 @@ public class Delete extends SettlementCommand {
             return true;
         }
         if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.OWNER) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".delete", false, true)) {
-            getConfirmation(sPlayer, target);
+            getDeletionConfirmation(sPlayer, target);
             SettlementMessenger.sendSettlementMessage(sender, new String[] {
                     "§4  Are you sure you want to do this?",
                     "§c  This will delete the Settlement " + target.getName() +" and all its plot/player",
@@ -74,7 +74,7 @@ public class Delete extends SettlementCommand {
         }
     }
 
-    private static void getConfirmation(final SettlementPlayer sPlayer, final Settlement settlement) {
+    private static void getDeletionConfirmation(final SettlementPlayer sPlayer, final Settlement settlement) {
         sPlayer.setConfirmable(new Runnable() {
             @SuppressWarnings("static-access")
             @Override

@@ -103,6 +103,9 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
     }
     
     public static void clearFromChunkCache(Settlement settlement) {
+        if (settlementCache == null) {
+            return;
+        }
         for (Iterator<Settlement> setIt = settlementCache.values().iterator(); setIt.hasNext();) {
             if (setIt.next().equals(settlement)) {
                 setIt.remove();
@@ -111,6 +114,9 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
     }
     
     public static void clearFromChunkCache(Chunk chunk) {
+        if (settlementCache == null) {
+            return;
+        }
         settlementCache.remove(chunk);
     }
 }
