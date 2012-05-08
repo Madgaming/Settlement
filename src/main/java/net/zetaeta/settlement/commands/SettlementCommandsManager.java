@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.management.Descriptor;
+
 import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
@@ -30,6 +32,7 @@ import net.zetaeta.settlement.commands.settlement.List;
 import net.zetaeta.settlement.commands.settlement.Moderator;
 import net.zetaeta.settlement.commands.settlement.OwnerCommands;
 import net.zetaeta.settlement.commands.settlement.Spawn;
+import net.zetaeta.settlement.commands.settlement.Unclaim;
 import net.zetaeta.settlement.commands.settlement.Usage;
 import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -39,14 +42,12 @@ import org.bukkit.command.CommandSender;
 
 public class SettlementCommandsManager extends DynamicCommandExecutor implements LocalCommand, SettlementConstants {
     
-    private final String[] aliases = {};
+    private final String[] aliases = {"settlement", "set", "s"};
     private Map<String, LocalCommand> subCommands = new HashMap<String, LocalCommand>();
     private String[] usage;
     private String[] shortUsage;
-    public static SettlementCommandsManager settlementCommandsManager;
     
     public SettlementCommandsManager() {
-        settlementCommandsManager = this;
         usage = new String[] {"settlement"};
         
         registerSubCommand(new Bypass(this));
@@ -65,6 +66,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommands(new OwnerCommands());
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
         registerSubCommands(new Spawn());
+        registerSubCommand(new Unclaim(this));
         registerSubCommand(new Usage(this));
         
         registerSubCommand(new Debug(this));
@@ -82,9 +84,13 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
      * @param args Arguments passed to the command in array form.
      * 
      * @return Whether command completes (unused).
-     * */
+     */
     
-    @net.zetaeta.libraries.commands.Command("settlement")
+    @net.zetaeta.libraries.commands.Command(value = "settlement",
+                                            aliases = {"s", "set"},
+                                            usage = "",
+                                            description = ""
+            )
     public boolean settlementCommand(CommandSender sender, Command command, String cmdlbl, String[] args) {
         if (args.length >= 1) {
             if (subCommands.containsKey(args[0].toLowerCase())) {
