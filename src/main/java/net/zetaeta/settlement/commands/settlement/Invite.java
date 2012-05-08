@@ -6,10 +6,10 @@ import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -66,7 +66,7 @@ public class Invite extends SettlementCommand {
         }
         Settlement invitedTo = SettlementUtil.getFocusedOrStated(sPlayer, cArgs);
         if (invitedTo != null) {
-            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(SettlementRank.MODERATOR) && !SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
+            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(Rank.MODERATOR) && !SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
                 invitedTo.sendNoRightsMessage(sender);
                 return true;
             }

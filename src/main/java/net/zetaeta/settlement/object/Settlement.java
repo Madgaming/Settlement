@@ -1,4 +1,4 @@
-package net.zetaeta.settlement;
+package net.zetaeta.settlement.object;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -21,6 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 
+import net.zetaeta.settlement.ConfigurationConstants;
+import net.zetaeta.settlement.FlatFileIO;
+import net.zetaeta.settlement.SettlementConstants;
+import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.ToBeSaved;
 import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
@@ -41,9 +46,7 @@ import org.bukkit.entity.Player;
  */
 public class Settlement implements SettlementConstants, Comparable<Settlement> {
 
-    private static Map<String, Settlement> settlementsByName = new ConcurrentSkipListMap<String, Settlement>();
-    private static Map<Integer, Settlement> settlementsByUID = new ConcurrentHashMap<Integer, Settlement>();
-    private static Map<World, Collection<Settlement>> settlementsByWorld;
+//    private static Map<World, Collection<Settlement>> settlementsByWorld;
     
     @ToBeSaved
     private int bonusPlots;
@@ -89,12 +92,13 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         members.add(ownerName);
         onlineMembers.add(owner);
         this.UID = UID;
-        settlementsByName.put(name, this);
-        settlementsByUID.put(UID, this);
+//        settlementsByName.put(name, this);
+//        settlementsByUID.put(UID, this);
         allowedPlots = ConfigurationConstants.plotsPerPlayer;
-        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
-            settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-        }
+        server.registerSettlement(this);
+//        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
+//            settlementsByWorld = new HashMap<World, Collection<Settlement>>();
+//        }
     }
     
     /**
@@ -105,185 +109,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         this.name = name;
         this.UID = uid;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
-        settlementsByName.put(name, this);
-        settlementsByUID.put(UID, this);
-        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
-            settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-        }
+        server.registerSettlement(this);
+//        settlementsByName.put(name, this);
+//        settlementsByUID.put(UID, this);
+//        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
+//            settlementsByWorld = new HashMap<World, Collection<Settlement>>();
+//        }
     }
 
-    /**
-     * Gets the Settlement with the given name
-     * 
-     * @param name Name of the Settlement to get.
-     * @return Settlement with the given name, or null if no Settlement has that name.
-     */
-    public static Settlement getSettlement(String name) {
-        return settlementsByName.get(name);
-    }
-    
-    /**
-     * Gets the Settlement with the given unique ID.
-     * 
-     * @param uid UID of the Settlement to get.
-     * @return Settlement with the given UID, or null if none has it.
-     */
-    public static Settlement getSettlement(int uid) {
-        return settlementsByUID.get(uid);
-    }
-    
-    /**
-     * Gets a {@link java.util.Collection} of all Settlements currently loaded.
-     * 
-     * @return Collection of all Settlements.
-     */
-    public static Collection<Settlement> getSettlements() {
-        return settlementsByUID.values();
-    }
-    
-    /**
-     * Gets an ordered {@link Collection} of all Settlements currently loaded in alphabetical order of their name.
-     * 
-     * @return Ordered collection of Settlements
-     */
-    public static Collection<Settlement> getOrderedSettlements() {
-        return settlementsByName.values();
-    }
-    
-    /**
-     * Gets a {@link Collection} of all the Settlements that have plots in a given world.
-     * <p />
-     * WARNING: This method is <b>very</b> slow if {@link ConfigurationConstants#useSettlementWorldCacheing Settlement world cacheing} is disabled
-     * and should not be used unless absolutely necessary, especially in the main thread.
-     * 
-     * @param world {@link World} to get Settlements in.
-     * @return Collection of Settlements with plots in world.
-     */
-    public static Collection<Settlement> getSettlementsIn(World world) {
-        if (ConfigurationConstants.useSettlementWorldCacheing) {
-            return settlementsByWorld.get(world);
-        }
-        else {
-            Collection<Settlement> worldSets = new HashSet<Settlement>();
-            for (Settlement set : settlementsByUID.values()) {
-                for (Chunk chunk : set.getPlots()) {
-                    if (chunk.getWorld().equals(world)) {
-                        worldSets.add(set);
-                        break;
-                    }
-                }
-            }
-            return worldSets;
-        }
-    }
-    
-    /**
-     * Loads all Settlements from ./Settlement/data/settlements.dat
-     * @return 
-     */
-    public static int loadSettlements() {
-        log.info("Loading Settlements...");
-        File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
-        if (!settlementsFile.exists()) {
-            try {
-                settlementsFile.createNewFile();
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "Could not create settlements.dat file!", e);
-                e.printStackTrace();
-            }
-            return 0;
-        }
-        DataInputStream dis = null;
-        try {
-            dis = new DataInputStream(new FileInputStream(settlementsFile));
-        } catch (FileNotFoundException e) {
-            log.severe("Could not open settlements.dat file!");
-            return 0;
-        }
-        
-        int count = 0;
-        try {
-            if (dis.available() > 0) {
-                int version = dis.readInt();
-                if (version == 0) {
-                    while(dis.available() > 0) {
-                        FlatFileIO.loadSettlementV0_0(dis);
-                        ++count;
-                    }
-                }
-                else {
-                    log.severe("Error reading from settlements.dat: Unsupported format version: " + version);
-                }
-            }
-        } catch (IOException e) {
-            log.log(Level.SEVERE, "Error while loading Settlements!", e);
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                dis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return count;
-    }
-    
-    /**
-     * Saves all Settlements to ./Settlement/data/settlements.dat
-     */
-    public static void saveSettlements() {
-        log.info("Saving Settlements...");
-        File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
-        if (!settlementsFile.exists()) {
-            try {
-                settlementsFile.createNewFile();
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "Could not create settlements.dat file!", e);
-                e.printStackTrace();
-                return;
-            }
-        }
-        DataOutputStream dos = null;
-        try {
-            dos = new DataOutputStream(new FileOutputStream(settlementsFile));
-        } catch (FileNotFoundException e) {
-            log.severe("Could not open settlements.dat file!");
-            return;
-        }
-        try {
-            dos.writeInt(FlatFileIO.FILE_FORMAT_VERSION);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        for (Settlement settlement : settlementsByUID.values()) {
-            if (!settlement.shouldSave)
-                continue;
-            try {
-                FlatFileIO.saveSettlementV0_0(settlement, dos);
-            } catch (IOException e) {
-                log.log(Level.SEVERE, "Error while saving Settlement " + settlement.name + "!", e);
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    /**
-     * Gets a random new Unique ID for creating a new Settlement, guaranteed to be different from the UID of any other current Settlement.
-     * 
-     * @return new random unique ID.
-     */
-    public static int getNewUID() {
-        System.out.println("getNewUID");
-        Random uidGen = new Random();
-        int possible = 0;
-        do {
-            possible = uidGen.nextInt();
-        }
-        while (settlementsByUID.containsKey(possible));
-        return possible;
-    }
-    
     /**
      * Gets the Settlement's unique ID, which is guaranteed to be both unique to this settlement among all on the server and also be permanent,
      * unlike its the name which can be changed.
@@ -469,13 +302,13 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public void addModerator(SettlementPlayer sPlayer) {
         baseMembers.remove(sPlayer.getName());
         moderators.add(sPlayer.getName());
-        sPlayer.setRank(this, SettlementRank.MODERATOR);
+        sPlayer.setRank(this, Rank.MODERATOR);
     }
     
     public void removeModerator(SettlementPlayer sPlayer) {
         moderators.remove(sPlayer.getName());
         baseMembers.add(sPlayer.getName());
-        sPlayer.setRank(this, SettlementRank.MEMBER);
+        sPlayer.setRank(this, Rank.MEMBER);
     }
     
     /**
@@ -520,10 +353,8 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * @param cause {@link SettlementPlayer} that changed the name, to include in the broadcasted message.
      */
     public void changeName(String newName, SettlementPlayer cause) {
-        String oldName = name;
+        server.changeSettlementName(this, newName);
         name = newName;
-        settlementsByName.remove(oldName);
-        settlementsByName.put(newName, this);
         broadcastSettlementMessage("§b  " + cause.getName() + " §achanged the settlement's name to " + name);
     }
     
@@ -616,11 +447,10 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * Called to delete the settlement, clearing up memory and files.
      * */
     public void delete() {
-        settlementsByName.remove(name);
-        settlementsByUID.remove(UID);
-        if (settlementsByWorld != null) {
-            settlementsByWorld.remove(name);
-        }
+        server.unregisterSettlement(this);
+//        if (settlementsByWorld != null) {
+//            settlementsByWorld.remove(name);
+//        }
         for (SettlementPlayer sPlayer : onlineMembers) {
             sPlayer.removeSettlement(this);
         }
@@ -629,7 +459,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
                 sPlayer.setFocus(null);
             }
         }
-        SettlementUtil.clearFromChunkCache(this);
+        server.clearFromChunkCache(this);
     }
     
     /**
@@ -651,10 +481,10 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         baseMembers.add(newMember.getName());
         members.add(newMember.getName());
 //        if (newMember.getData(this) == null) {
-//            SettlementData data = new SettlementData(this, SettlementRank.MEMBER);
+//            SettlementData data = new SettlementData(this, Rank.MEMBER);
 //            newMember.addData(data);
 //        }
-        newMember.setRank(this, SettlementRank.MEMBER);
+        newMember.setRank(this, Rank.MEMBER);
         updateClaimablePlots();
     }
     
@@ -729,7 +559,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     @SuppressWarnings("static-access")
     public boolean claimLand(Player cause) {
         Chunk chunk = cause.getLocation().getChunk();
-        Settlement prevOwner = SettlementUtil.getOwner(chunk);
+        Settlement prevOwner = server.getOwner(chunk);
         if (prevOwner == this) {
             SettlementMessenger.sendSettlementMessage(cause, "§a  This plot already belongs to you!");
             return false;
@@ -743,15 +573,15 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             return false;
         }
         plots.add(chunk);
-        if (ConfigurationConstants.useSettlementWorldCacheing) {
-            if (settlementsByWorld == null) {
-                settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-            }
-            if (settlementsByWorld.get(chunk.getWorld()) == null) {
-                settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
-            }
-            settlementsByWorld.get(chunk.getWorld()).add(this);
-        }
+//        if (ConfigurationConstants.useSettlementWorldCacheing) {
+//            if (settlementsByWorld == null) {
+//                settlementsByWorld = new HashMap<World, Collection<Settlement>>();
+//            }
+//            if (settlementsByWorld.get(chunk.getWorld()) == null) {
+//                settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
+//            }
+//            settlementsByWorld.get(chunk.getWorld()).add(this);
+//        }
         broadcastSettlementMessage(SettlementUtil.concatString("§a  ", cause.getName(), " claimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
@@ -759,13 +589,13 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     @SuppressWarnings("static-access")
     public boolean unclaimLand(Player cause) {
         Chunk chunk = cause.getLocation().getChunk();
-        Settlement prevOwner = SettlementUtil.getOwner(chunk);
+        Settlement prevOwner = server.getOwner(chunk);
         if (!this.equals(prevOwner)) {
             SettlementMessenger.sendSettlementMessage(cause, "§a  This plot does not belong to you!");
             return false;
         }
         plots.remove(chunk);
-        SettlementUtil.clearFromChunkCache(chunk);
+        server.clearFromChunkCache(chunk);
         broadcastSettlementMessage(SettlementUtil.concatString("§a  ", cause.getName(), " unclaimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
@@ -773,20 +603,20 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public boolean addChunk(Chunk chunk) {
         plots.add(chunk);
         if (ConfigurationConstants.useSettlementWorldCacheing) {
-            if (ConfigurationConstants.useSettlementWorldCacheing) {
-                if (settlementsByWorld == null) {
-                    settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-                }
-                if (settlementsByWorld.get(chunk.getWorld()) == null) {
-                    settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
-                }
-                settlementsByWorld.get(chunk.getWorld()).add(this);
-            }
+//            if (ConfigurationConstants.useSettlementWorldCacheing) {
+//                if (settlementsByWorld == null) {
+//                    settlementsByWorld = new HashMap<World, Collection<Settlement>>();
+//                }
+//                if (settlementsByWorld.get(chunk.getWorld()) == null) {
+//                    settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
+//                }
+//                settlementsByWorld.get(chunk.getWorld()).add(this);
+//            }
         }
         return true;
     }
     
-    public Collection<String> getInvitations() {
+    private Collection<String> getInvitations() {
         return invitations;
     }
     

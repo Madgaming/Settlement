@@ -6,11 +6,11 @@ import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementConstants;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -61,7 +61,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
             if (sPlayer.getFocus() != null) {
                 Settlement target = sPlayer.getFocus();
-                if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.MODERATOR) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
+                if (sPlayer.getRank(target).isEqualOrSuperiorTo(Rank.MODERATOR) || SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".set.slogan")) {
                     String slogan = SettlementUtil.arrayAsString(args.getUnprocessedArgArray());
                     target.setSlogan(slogan);
                     target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
@@ -92,12 +92,12 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
         else {
             return false;
         }
-        Settlement target = Settlement.getSettlement(settlementName);
+        Settlement target = server.getSettlement(settlementName);
         if (target == null) {
             sender.sendMessage("§cThere is no Settlement of that name!");
             return true;
         }
-        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
+        if (sender.hasPermission(ADMIN_OWNER_PERMISSION + ".set.slogan") || SettlementPlayer.getSettlementPlayer((Player) sender).getRank(target).isEqualOrSuperiorTo(Rank.MODERATOR)) {
             target.setSlogan(slogan);
             target.broadcastSettlementMessage("§b  " + sender.getName() + " §achanged the Settlement's slogan to " + slogan + "!");
             return true;
@@ -128,7 +128,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             return true;
         }
         if (args.hasFlagValue("name")) {
-            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
                 settlement.changeName(args.getFlagValue("name"), sPlayer);
                 return true;
             }
@@ -138,7 +138,7 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             }
         }
         else if (!settlement.getName().equalsIgnoreCase(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()))) {
-            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
+            if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
                 settlement.changeName(SettlementUtil.arrayAsString(args.getUnprocessedArgArray()), sPlayer);
                 return true;
             }
@@ -171,8 +171,8 @@ public class Set extends SettlementCommand implements LocalCommandExecutor, Sett
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
-            if (!settlement.equals(SettlementUtil.getOwner(player.getLocation().getChunk()))) {
+        if (SettlementUtil.checkPermission(sender, SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
+            if (!settlement.equals(server.getOwner(player.getLocation().getChunk()))) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
                 return true;
             }

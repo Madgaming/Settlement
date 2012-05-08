@@ -3,9 +3,9 @@ package net.zetaeta.settlement.commands.settlement;
 import java.util.ArrayList;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
-import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementThreadManager;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -60,7 +60,7 @@ public class List extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     public void sendList(CommandSender sender, int page) {
-        ArrayList<Settlement> sList = new ArrayList<Settlement>(Settlement.getOrderedSettlements());
+        ArrayList<Settlement> sList = new ArrayList<Settlement>(server.getOrderedSettlements());
         ArrayList<String> sentList = new ArrayList<String>(11);
         sentList.add("§2  Name            |             Members |  Plots");
         for (int i = page * 10, j = 1; i < (page * 10) + 10; ++i, ++j) {

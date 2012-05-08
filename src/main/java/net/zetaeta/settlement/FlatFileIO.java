@@ -9,6 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementData;
+import net.zetaeta.settlement.object.SettlementPlayer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -62,33 +66,33 @@ public final class FlatFileIO implements SettlementConstants {
         else {
             dos.writeChar('|');
         }
-        if (ConfigurationConstants.useSettlementWorldCacheing && set.worldPlots != null) {
-            if (set.worldPlots.size() > 0) {
-                dos.writeChar('{');
-                for (World wrld : set.worldPlots.keySet()) {
-                    Collection<Chunk> chunks = set.worldPlots.get(wrld);
-                    if (chunks.size() > 0) {
-                        dos.writeChar('{');
-                        dos.writeLong(wrld.getUID().getMostSignificantBits());
-                        dos.writeLong(wrld.getUID().getLeastSignificantBits());
-                        dos.writeChar(':');
-                        for (Chunk ch : chunks) {
-                            dos.writeChar(',');
-                            dos.writeInt(ch.getX());
-                            dos.writeInt(ch.getZ());
-                        }
-                        dos.writeChar('}');
-                        dos.writeChar(';');
-                    }
-                    else {
-                        dos.writeChar('|');
-                    }
-                }
-                dos.writeChar('}');
-            }
-            else {
-                dos.writeChar('|');
-            }
+        if (ConfigurationConstants.useSettlementWorldCacheing) {// && set.worldPlots != null) {
+//            if (set.worldPlots.size() > 0) {
+//                dos.writeChar('{');
+//                for (World wrld : set.worldPlots.keySet()) {
+//                    Collection<Chunk> chunks = set.worldPlots.get(wrld);
+//                    if (chunks.size() > 0) {
+//                        dos.writeChar('{');
+//                        dos.writeLong(wrld.getUID().getMostSignificantBits());
+//                        dos.writeLong(wrld.getUID().getLeastSignificantBits());
+//                        dos.writeChar(':');
+//                        for (Chunk ch : chunks) {
+//                            dos.writeChar(',');
+//                            dos.writeInt(ch.getX());
+//                            dos.writeInt(ch.getZ());
+//                        }
+//                        dos.writeChar('}');
+//                        dos.writeChar(';');
+//                    }
+//                    else {
+//                        dos.writeChar('|');
+//                    }
+//                }
+//                dos.writeChar('}');
+//            }
+//            else {
+//                dos.writeChar('|');
+//            }
         } else {
             if (set.getPlots().size() > 0) {
                 if (reusableWorldPlots == null) {
@@ -205,7 +209,7 @@ public final class FlatFileIO implements SettlementConstants {
     
     public static void savePlayerV0_0(SettlementPlayer sPlayer, DataOutputStream dos) throws IOException {
         dos.writeInt(FILE_FORMAT_VERSION); // Save format version
-        dos.writeLong(sPlayer.lastOnline);
+        dos.writeLong(System.currentTimeMillis());
         dos.writeChar('{');
         for (SettlementData data : sPlayer.getData()) {
             dos.writeChar(';');
@@ -223,7 +227,7 @@ public final class FlatFileIO implements SettlementConstants {
     }
     
     public static void loadPlayerV0_0(SettlementPlayer sPlayer, DataInputStream dis) throws IOException {
-        sPlayer.lastOnline = dis.readLong();
+        sPlayer.initialiseLastOnline(dis.readLong());
         char c = dis.readChar();
         if (c == '{') {
             while (dis.readChar() != '}') {
@@ -245,7 +249,7 @@ public final class FlatFileIO implements SettlementConstants {
         if (dis.readChar() != ']') {
             return null;
         }
-        Settlement set = Settlement.getSettlement(uid);
+        Settlement set = server.getSettlement(uid);
         if (set == null) {
             return null;
         }
@@ -253,11 +257,11 @@ public final class FlatFileIO implements SettlementConstants {
         case 0 :
             return null;
         case 1 :
-            return new SettlementData(set, SettlementRank.MEMBER, title);
+            return new SettlementData(set, Rank.MEMBER, title);
         case 2 :
-            return new SettlementData(set, SettlementRank.MODERATOR, title);
+            return new SettlementData(set, Rank.MODERATOR, title);
         case 3 :
-            return new SettlementData(set, SettlementRank.OWNER, title);
+            return new SettlementData(set, Rank.OWNER, title);
         default :
             log.warning("Player " + sPlayer.getName() + " had an invalid rank in " + set.getName());
             return null;

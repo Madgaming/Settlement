@@ -1,15 +1,19 @@
-package net.zetaeta.settlement;
+package net.zetaeta.settlement.object;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-public class SettlementData implements Externalizable {
+import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.SettlementConstants;
+import net.zetaeta.settlement.ToBeSaved;
+
+public class SettlementData implements SettlementConstants {
 
     private String settlementName;
     @ToBeSaved
-    private SettlementRank rank;
+    private Rank rank;
     @ToBeSaved
     private String title;
     @ToBeSaved
@@ -24,16 +28,16 @@ public class SettlementData implements Externalizable {
      */
     @Deprecated
     public SettlementData() {
-        this(null, SettlementRank.MEMBER, "");
+        this(null, Rank.MEMBER, "");
     }
     
     /**
-     * Bare consructor, creates SettlementData with specified settlement and assigns default rank SettlementRank.MEMBER
+     * Bare consructor, creates SettlementData with specified settlement and assigns default rank Rank.MEMBER
      * 
      * @param settlement Settlement to associate with this data.
      * */
     public SettlementData(Settlement settlement) {
-        this(settlement, SettlementRank.MEMBER);
+        this(settlement, Rank.MEMBER);
     }
     
     /**
@@ -41,9 +45,9 @@ public class SettlementData implements Externalizable {
      * 
      * @param settlement Settlement to associate with this data.
      * 
-     * @param rank SettlementRank to give to the player in this town.
+     * @param rank Rank to give to the player in this town.
      * */
-    public SettlementData(Settlement settlement, SettlementRank rank) {
+    public SettlementData(Settlement settlement, Rank rank) {
         this(settlement, rank, "");
     }
     
@@ -52,11 +56,11 @@ public class SettlementData implements Externalizable {
      * 
      * @param settlement Settlement this data is to be associated with.
      * 
-     * @param rank SettlementRank to give to the player in this settlement.
+     * @param rank Rank to give to the player in this settlement.
      * 
      * @param title Title to give to the player in this settlement.
      * */
-    public SettlementData(Settlement settlement, SettlementRank rank, String title) {
+    public SettlementData(Settlement settlement, Rank rank, String title) {
         this.settlement = settlement;
         settlementName = settlement.getName();
         this.title = title;
@@ -64,23 +68,10 @@ public class SettlementData implements Externalizable {
         settlementUID = settlement.getUid();
     }
     
-    
-    @Override
-    public void readExternal(ObjectInput in) throws IOException,
-            ClassNotFoundException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        // TODO Auto-generated method stub
-        
-    }
     /**
      * Gets the player's rank in the settlement associated with this data.
      * */
-    public SettlementRank getRank() {
+    public Rank getRank() {
         return rank;
     }
     /**
@@ -106,7 +97,7 @@ public class SettlementData implements Externalizable {
      * */
     public Settlement getSettlement() {
         if (settlement == null) {
-            settlement = Settlement.getSettlement(settlementName);
+            settlement = server.getSettlement(settlementName);
         }
         return settlement;
     }
@@ -120,11 +111,11 @@ public class SettlementData implements Externalizable {
         this.title = title;
     }
     /**
-     * Sets the player's SettlementRank in the settlement associated with this data.
+     * Sets the player's Rank in the settlement associated with this data.
      * 
      * @param rank New rank to associate.
      * */
-    public void setRank(SettlementRank rank) {
+    public void setRank(Rank rank) {
         this.rank = rank;
     }
     /**

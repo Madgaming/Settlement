@@ -1,9 +1,9 @@
 package net.zetaeta.settlement.listeners;
 
-import net.zetaeta.settlement.Settlement;
 import net.zetaeta.settlement.SettlementConstants;
-import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.SettlementPlugin;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -51,8 +51,8 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
         }
         Chunk to = event.getTo().getChunk();
         Chunk from = event.getFrom().getChunk();
-        Settlement owner = SettlementUtil.getOwner(to);
-        Settlement prev = SettlementUtil.getOwner(from);
+        Settlement owner = server.getOwner(to);
+        Settlement prev = server.getOwner(from);
         if (owner == prev) {
             return;
         }

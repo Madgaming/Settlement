@@ -1,9 +1,11 @@
 package net.zetaeta.settlement;
 
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
+import net.zetaeta.settlement.object.SettlementServer;
+
 public interface SettlementConstants {
-    public static Logger log = SettlementPlugin.log;
-    public static SettlementPlugin plugin = SettlementPlugin.plugin;
+    public static final Logger log = SettlementPlugin.log;
+    public static final SettlementPlugin plugin = SettlementPlugin.plugin;
+    public static final SettlementServer server = plugin.getSettlementServer();
 }

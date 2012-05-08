@@ -1,11 +1,11 @@
 package net.zetaeta.settlement.commands.settlement.debug;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementData;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementData;
+import net.zetaeta.settlement.object.SettlementPlayer;
 
 import org.bukkit.command.CommandSender;
 
@@ -21,14 +21,14 @@ public class ReloadSettlementData extends SettlementCommand {
     
     public boolean execute(CommandSender sender, String alias, String[] args) {
         sender.sendMessage("Reloading...");
-        for (Settlement settlement : Settlement.getSettlements()) {
+        for (Settlement settlement : server.getSettlements()) {
             for (SettlementPlayer player : settlement.getOnlineMembers()) {
-                player.setRank(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MODERATOR : SettlementRank.MEMBER)));
+                player.setRank(settlement, (settlement.getOwner() == player ? Rank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? Rank.MODERATOR : Rank.MEMBER)));
             }
             for (String plNm : settlement.getMemberNames()) {
                 SettlementPlayer player;
                 if ((player = SettlementPlayer.getSettlementPlayer(plNm)) != null) {
-                    player.setRank(settlement, (settlement.getOwner() == player ? SettlementRank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? SettlementRank.MODERATOR : SettlementRank.MEMBER)));
+                    player.setRank(settlement, (settlement.getOwner() == player ? Rank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? Rank.MODERATOR : Rank.MEMBER)));
                 }
             }
         }

@@ -3,10 +3,11 @@ package net.zetaeta.settlement.commands.settlement;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -14,7 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Spawn implements LocalCommandExecutor {
+public class Spawn implements LocalCommandExecutor, SettlementConstants {
     
     @Command(usage = {"§2 - /settlement spawn [settlement]:",
                       "§a  \u00bbTeleport to the settlement's spawn"},
@@ -55,8 +56,8 @@ public class Spawn implements LocalCommandExecutor {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.MODERATOR)) {
-            if (!settlement.equals(SettlementUtil.getOwner(player.getLocation().getChunk()))) {
+        if (SettlementUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
+            if (!settlement.equals(server.getOwner(player.getLocation().getChunk()))) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
                 return true;
             }

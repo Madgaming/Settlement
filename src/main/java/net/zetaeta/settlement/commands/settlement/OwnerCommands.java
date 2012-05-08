@@ -6,14 +6,15 @@ import org.bukkit.entity.Player;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
-public class OwnerCommands implements LocalCommandExecutor {
+public class OwnerCommands implements LocalCommandExecutor, SettlementConstants {
     
     @SuppressWarnings("static-access")
     @Command(aliases = {"create", "new"},
@@ -31,7 +32,7 @@ public class OwnerCommands implements LocalCommandExecutor {
         }
         SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
         String setName = SettlementUtil.arrayAsString(rawArgs);
-        if (Settlement.getSettlement(setName) != null) {
+        if (server.getSettlement(setName) != null) {
             SettlementMessenger.sendSettlementMessage(sender, "§cA settlement with the name §6" + setName + " §calready exists!");
             return true;
         }
@@ -39,8 +40,8 @@ public class OwnerCommands implements LocalCommandExecutor {
             SettlementMessenger.sendSettlementMessage(sender, "§cThat name is too long!");
             return true;
         }
-        Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(rawArgs), Settlement.getNewUID());
-        sPlayer.setRank(settlement, SettlementRank.OWNER);
+        Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(rawArgs), plugin.getSettlementServer().getNewUID());
+        sPlayer.setRank(settlement, Rank.OWNER);
         settlement.broadcastSettlementMessage("§a  Settlement Created!");
         return true;
     }
@@ -60,7 +61,7 @@ public class OwnerCommands implements LocalCommandExecutor {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(target).isEqualOrSuperiorTo(SettlementRank.OWNER) || SettlementUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".delete", false, true)) {
+        if (sPlayer.getRank(target).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".delete", false, true)) {
             getDeletionConfirmation(sPlayer, target);
             SettlementMessenger.sendSettlementMessage(sender, new String[] {
                     "§4  Are you sure you want to do this?",

@@ -2,9 +2,9 @@ package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -66,7 +66,7 @@ public class Info extends SettlementCommand {
             }
             SettlementMessenger.sendGlobalSettlementInfo(sender);
         }
-        Settlement settlement = Settlement.getSettlement(SettlementUtil.arrayAsString(args));
+        Settlement settlement = server.getSettlement(SettlementUtil.arrayAsString(args));
         if (settlement == null) {
             SettlementMessenger.sendGlobalSettlementInfo(sender);
             return true;

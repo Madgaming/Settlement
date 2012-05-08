@@ -13,6 +13,9 @@ import net.zetaeta.libraries.commands.CommandsManager;
 import net.zetaeta.settlement.commands.SettlementCommandsManager;
 import net.zetaeta.settlement.listeners.SettlementBlockListener;
 import net.zetaeta.settlement.listeners.SettlementPlayerListener;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
+import net.zetaeta.settlement.object.SettlementServer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,23 +23,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
 public class SettlementPlugin extends ManagedJavaPlugin {
-    
     public static Logger log;
     public static SettlementPlugin plugin;
-//    public static ExecutorService settlementThreadPool = Executors.newCachedThreadPool();
     private PluginManager pm;
-    public FileConfiguration config;
-    public CommandsManager commandsManager;
+    private FileConfiguration config;
+    private CommandsManager commandsManager;
     protected SettlementCommandsManager sCommandExec;
+    private SettlementServer server;
     
     /**
      * Contains the unloading procedure for the plugin.
-     * */
+     */
     
     @Override
     public void onDisable() {
         try {
-            Settlement.saveSettlements();
+            server.saveSettlements();
         }
         catch (Throwable e) {
             log.log(Level.SEVERE, "Error saving Settlements!", e);
@@ -59,9 +61,10 @@ public class SettlementPlugin extends ManagedJavaPlugin {
         plugin = this;
         log.info("LOADING...");
         SettlementThreadManager.init();
+        server = new SettlementServer(this);
         Future<?> settlementLoader = SettlementThreadManager.submitAsyncTask(new Runnable() {
             public void run() {
-                int settlementCount = Settlement.loadSettlements();
+                int settlementCount = server.loadSettlements();
                 log.info("Loaded" + settlementCount + "Settlements!");
                 int playerCount = 0;
                 for (Player player : Bukkit.getOnlinePlayers()) {
@@ -108,5 +111,8 @@ public class SettlementPlugin extends ManagedJavaPlugin {
         pFolder.mkdirs();
         return pFolder;
     }
-
+    
+    public SettlementServer getSettlementServer() {
+        return server;
+    }
 }

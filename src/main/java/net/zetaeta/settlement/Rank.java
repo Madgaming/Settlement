@@ -1,7 +1,7 @@
 package net.zetaeta.settlement;
 
 
-public enum SettlementRank {
+public enum Rank {
     OUTSIDER(0, ConfigurationConstants.outsiderName),
     MEMBER(1, ConfigurationConstants.memberName), 
     MODERATOR(2, ConfigurationConstants.modName), 
@@ -10,7 +10,7 @@ public enum SettlementRank {
     private int priority;
     private String name;
     
-    private SettlementRank(int pri, String name) {
+    private Rank(int pri, String name) {
         priority = pri;
         this.name = name;
     }
@@ -23,15 +23,15 @@ public enum SettlementRank {
         return name;
     }
     
-    public static SettlementRank getSuperior(SettlementRank a, SettlementRank b) {
+    public static Rank getSuperior(Rank a, Rank b) {
         return a.priority > b.priority ? a : b;
     }
     
-    public boolean isSuperiorTo(SettlementRank other) {
+    public boolean isSuperiorTo(Rank other) {
         return this.priority > other.priority;
     }
     
-    public static SettlementRank getByPriority(int priority) {
+    public static Rank getByPriority(int priority) {
         switch  (priority) {
         case 0 :
             return OUTSIDER;
@@ -46,7 +46,7 @@ public enum SettlementRank {
         }
     }
     
-    public boolean isEqualOrSuperiorTo(SettlementRank other) {
+    public boolean isEqualOrSuperiorTo(Rank other) {
         return this.priority >= other.priority;
     }
 }

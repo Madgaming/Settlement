@@ -2,10 +2,10 @@ package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -53,7 +53,7 @@ public class Leave extends SettlementCommand {
                     return true;
                 }
             }
-            if (sPlayer.getRank(from) == SettlementRank.OWNER && from.getMemberCount() > 1) {
+            if (sPlayer.getRank(from) == Rank.OWNER && from.getMemberCount() > 1) {
                 SettlementMessenger.sendSettlementMessage(sender, "§c  You are not allowed to do that!", "§a  As §bowner §a, you may not leave the settlement without first deleting it!", "§a  If you are sure, use /settlement delete!");
             }
             from.removeMember(sPlayer);

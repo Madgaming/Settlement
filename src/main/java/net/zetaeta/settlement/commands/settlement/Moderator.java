@@ -8,10 +8,10 @@ import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
-import net.zetaeta.settlement.Settlement;
-import net.zetaeta.settlement.SettlementPlayer;
-import net.zetaeta.settlement.SettlementRank;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
+import net.zetaeta.settlement.object.Settlement;
+import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
 
@@ -68,7 +68,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
             SettlementMessenger.sendInvalidPlayerMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
+        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
             if (!settlement.isMember(sPlayer)) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a member of the Settlement §6", settlement.getName(), "§c!"));
                 return true;
@@ -122,7 +122,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
             SettlementMessenger.sendInvalidPlayerMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(SettlementRank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
+        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
             if (!settlement.isModerator(target)) {
                 SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a moderator in the settlement §6", settlement.getName(), "§c!"));
                 return true;

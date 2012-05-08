@@ -1,4 +1,4 @@
-package net.zetaeta.settlement;
+package net.zetaeta.settlement.object;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+
+import net.zetaeta.settlement.FlatFileIO;
+import net.zetaeta.settlement.SettlementConstants;
+import net.zetaeta.settlement.SettlementPlugin;
+import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.ToBeSaved;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -194,6 +200,14 @@ public class SettlementPlayer implements SettlementConstants {
         return name;
     }
     
+    public long getLastOnline() {
+        return lastOnline;
+    }
+    
+    public void initialiseLastOnline(long time) {
+        lastOnline = time;
+    }
+    
     public boolean isSettlementMember() {
         return getSettlements().length > 0;
     }
@@ -216,7 +230,7 @@ public class SettlementPlayer implements SettlementConstants {
         return null;
     }
     
-    public SettlementRank getRank(String settlementName) {
+    public Rank getRank(String settlementName) {
         for (SettlementData data : settlementsInfo) {
             if (data.getSettlementName().equalsIgnoreCase(settlementName)) {
                 return data.getRank();
@@ -235,7 +249,7 @@ public class SettlementPlayer implements SettlementConstants {
      * 
      * @param data SettlementData to be associated.
      * */
-    protected void addData(SettlementData data) {
+    public void addData(SettlementData data) {
          settlementsInfo.add(data);
     }
     
@@ -271,7 +285,7 @@ public class SettlementPlayer implements SettlementConstants {
         return null;
     }
     
-    protected Collection<SettlementData> getData() {
+    public Collection<SettlementData> getData() {
         return settlementsInfo;
     }
     
@@ -308,9 +322,9 @@ public class SettlementPlayer implements SettlementConstants {
      * 
      * @param settlement Settlement to assign rank in.
      * 
-     * @param rank SettlementRank to assign to player.
+     * @param rank Rank to assign to player.
      * */
-    public void setRank(Settlement settlement, SettlementRank rank) {
+    public void setRank(Settlement settlement, Rank rank) {
         if (getData(settlement) != null) {
             getData(settlement).setRank(rank);
         }
@@ -319,8 +333,8 @@ public class SettlementPlayer implements SettlementConstants {
         }
     }
     
-    public SettlementRank getRank(Settlement settlement) {
-        return getData(settlement) != null ? getData(settlement).getRank() : SettlementRank.OUTSIDER;
+    public Rank getRank(Settlement settlement) {
+        return getData(settlement) != null ? getData(settlement).getRank() : Rank.OUTSIDER;
     }
     
     public void setTitle (Settlement settlement, String title) {
