@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 
 import net.zetaeta.settlement.commands.settlement.Info;
@@ -40,8 +41,8 @@ import org.bukkit.entity.Player;
  */
 public class Settlement implements SettlementConstants, Comparable<Settlement> {
 
-    private static Map<String, Settlement> settlementsByName = new TreeMap<String, Settlement>();
-    private static Map<Integer, Settlement> settlementsByUID = new HashMap<Integer, Settlement>();
+    private static Map<String, Settlement> settlementsByName = new ConcurrentSkipListMap<String, Settlement>();
+    private static Map<Integer, Settlement> settlementsByUID = new ConcurrentHashMap<Integer, Settlement>();
     private static Map<World, Collection<Settlement>> settlementsByWorld;
     
     @ToBeSaved
