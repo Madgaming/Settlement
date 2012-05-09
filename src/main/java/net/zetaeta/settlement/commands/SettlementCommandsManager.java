@@ -1,6 +1,6 @@
 package net.zetaeta.settlement.commands;
 
-import static net.zetaeta.libraries.ZPUtil.removeFirstIndex;
+import static net.zetaeta.libraries.Util.removeFirstIndex;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.management.Descriptor;
-
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
@@ -26,13 +24,11 @@ import net.zetaeta.settlement.commands.settlement.Focus;
 import net.zetaeta.settlement.commands.settlement.Help;
 import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.commands.settlement.Invite;
-import net.zetaeta.settlement.commands.settlement.Join;
-import net.zetaeta.settlement.commands.settlement.Leave;
 import net.zetaeta.settlement.commands.settlement.List;
 import net.zetaeta.settlement.commands.settlement.Moderator;
 import net.zetaeta.settlement.commands.settlement.OwnerCommands;
+import net.zetaeta.settlement.commands.settlement.PlayerCommands;
 import net.zetaeta.settlement.commands.settlement.Spawn;
-import net.zetaeta.settlement.commands.settlement.Unclaim;
 import net.zetaeta.settlement.commands.settlement.Usage;
 import net.zetaeta.settlement.commands.settlement.debug.Debug;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -59,14 +55,14 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
         registerSubCommand(new Help(this));
         registerSubCommand(new Info(this));
         registerSubCommand(new Invite(this));
-        registerSubCommand(new Join(this));
-        registerSubCommand(new Leave(this));
+//        registerSubCommand(new Join(this));
+//        registerSubCommand(new Leave(this));
         registerSubCommand(new List(this));
         registerSubCommand(new Moderator(this));
         registerSubCommands(new OwnerCommands());
+        registerSubCommands(new PlayerCommands());
         registerSubCommand(new net.zetaeta.settlement.commands.settlement.Set(this));
         registerSubCommands(new Spawn());
-        registerSubCommand(new Unclaim(this));
         registerSubCommand(new Usage(this));
         
         registerSubCommand(new Debug(this));
@@ -199,7 +195,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
             return subCommands.get(alias);
         }
         else {
-            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(Util.removeFirstIndex(aliases));
         }
     }
     
@@ -208,7 +204,7 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
             return subCommands.get(aliases[0]);
         }
         else {
-            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(Util.removeFirstIndex(aliases));
         }
     }
     

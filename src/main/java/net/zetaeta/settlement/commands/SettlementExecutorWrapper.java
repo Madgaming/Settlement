@@ -2,13 +2,12 @@ package net.zetaeta.settlement.commands;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.Future;
 
-import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.ExecutorWrapper;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementThreadManager;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -36,7 +35,7 @@ public class SettlementExecutorWrapper extends ExecutorWrapper implements Settle
         if (trySubCommand(sender, alias, args)) {
             return true;
         }
-        if (annotation.checkPermissions() && !ZPUtil.checkPermission(sender, permission, true, true)) {
+        if (annotation.checkPermissions() && !PermissionUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         if (annotation.playersOnly() && !(sender instanceof Player)) {

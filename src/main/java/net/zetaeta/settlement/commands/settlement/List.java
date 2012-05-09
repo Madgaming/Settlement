@@ -3,11 +3,12 @@ package net.zetaeta.settlement.commands.settlement;
 import java.util.ArrayList;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.SettlementThreadManager;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.util.SettlementMessenger;
-import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
 
@@ -31,7 +32,7 @@ public class List extends SettlementCommand {
     @SuppressWarnings("static-access")
     @Override
     public boolean execute(final CommandSender sender, String alias, String[] args) {
-        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+        if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         if (args.length == 0) {
@@ -71,7 +72,7 @@ public class List extends SettlementCommand {
             if (set == null) {
                 continue;
             }
-            sentList.add(SettlementUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "      ", set.getOnlineMemberCount(), '/', set.getMemberCount()));
+            sentList.add(StringUtil.concatString(32 + 12, "§2  ", SettlementMessenger.makeColumns(32, set.getName(), SettlementMessenger.LEFT_ALIGN), set.getPlotCount(), '/', set.getPlotLimit(), "      ", set.getOnlineMemberCount(), '/', set.getMemberCount()));
         }
         SettlementMessenger.sendSettlementMessage(sender, sentList.toArray(new String[sentList.size()]));
     }

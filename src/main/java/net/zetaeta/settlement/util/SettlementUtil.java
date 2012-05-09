@@ -1,26 +1,20 @@
 package net.zetaeta.settlement.util;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import net.zetaeta.libraries.ZPUtil;
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.settlement.ConfigurationConstants;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
 
-import org.bukkit.Chunk;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SettlementUtil extends ZPUtil implements SettlementConstants {
-    
+public class SettlementUtil implements SettlementConstants {
     
     public static Settlement getFocusedOrStated(SettlementPlayer player, String[] args, boolean sendError) {
         Settlement sm = null;
-        if ((sm = server.getSettlement(arrayAsString(args))) != null) {
+        if ((sm = server.getSettlement(StringUtil.arrayAsString(args))) != null) {
             return sm;
         }
         if ((sm = player.getFocus()) != null) {
@@ -42,7 +36,7 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
         if (args.hasFlagValue("settlement")) {
             return server.getSettlement(args.getFlagValue("settlement"));
         }
-        if ((returned = plugin.getSettlementServer().getSettlement(arrayAsString(args.getUnprocessedArgArray()))) != null) {
+        if ((returned = plugin.getSettlementServer().getSettlement(StringUtil.arrayAsString(args.getUnprocessedArgArray()))) != null) {
             return returned;
         }
         return player.getFocus();
@@ -52,11 +46,18 @@ public class SettlementUtil extends ZPUtil implements SettlementConstants {
         if (args.hasFlagValue("settlement")) {
             return server.getSettlement(args.getFlagValue("settlement"));
         }
-        return plugin.getSettlementServer().getSettlement(arrayAsString(args.getUnprocessedArgArray()));
+        return plugin.getSettlementServer().getSettlement(StringUtil.arrayAsString(args.getUnprocessedArgArray()));
+    }
+    
+    public static Settlement getFocusedOrSpecified(SettlementPlayer player, CommandArguments args) {
+        if (args.hasFlagValue("settlement")) {
+            return server.getSettlement(args.getFlagValue("settlement"));
+        }
+        return player.getFocus();
     }
     
     public static boolean checkCommandValid(CommandSender sender, String permission) {
-        if (!checkPermission(sender, permission, true, true)) {
+        if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
             return false;
         }
         if (!(sender instanceof Player)) {

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
@@ -113,7 +113,7 @@ public class PlotsCommandManager extends DynamicCommandExecutor implements Local
             return subCommands.get(alias);
         }
         else {
-            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(Util.removeFirstIndex(aliases));
         }
     }
 
@@ -123,7 +123,7 @@ public class PlotsCommandManager extends DynamicCommandExecutor implements Local
             return subCommands.get(aliases[0]);
         }
         else {
-            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(ZPUtil.removeFirstIndex(aliases));
+            return subCommands.get(aliases[0]) == null ? null : subCommands.get(aliases[0]).getSubCommand(Util.removeFirstIndex(aliases));
         }
     }
     

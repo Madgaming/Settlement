@@ -1,11 +1,10 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -13,6 +12,9 @@ import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
+
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class OwnerCommands implements LocalCommandExecutor, SettlementConstants {
     
@@ -30,8 +32,8 @@ public class OwnerCommands implements LocalCommandExecutor, SettlementConstants 
         if (rawArgs.length < 1) {
             return false;
         }
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
-        String setName = SettlementUtil.arrayAsString(rawArgs);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
+        String setName = StringUtil.arrayAsString(rawArgs);
         if (server.getSettlement(setName) != null) {
             SettlementMessenger.sendSettlementMessage(sender, "§cA settlement with the name §6" + setName + " §calready exists!");
             return true;
@@ -40,7 +42,8 @@ public class OwnerCommands implements LocalCommandExecutor, SettlementConstants 
             SettlementMessenger.sendSettlementMessage(sender, "§cThat name is too long!");
             return true;
         }
-        Settlement settlement = new Settlement(sPlayer, SettlementUtil.arrayAsString(rawArgs), plugin.getSettlementServer().getNewUID());
+        Settlement settlement = new Settlement(sPlayer, StringUtil.arrayAsString(rawArgs), plugin.getSettlementServer().getNewUID());
+        server.registerSettlement(settlement);
         sPlayer.setRank(settlement, Rank.OWNER);
         settlement.broadcastSettlementMessage("§a  Settlement Created!");
         return true;
@@ -55,13 +58,13 @@ public class OwnerCommands implements LocalCommandExecutor, SettlementConstants 
             useCommandArguments = true,
             playersOnly = true)
     public boolean delete(CommandSender sender, CommandArguments args) {
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         Settlement target = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (target == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(target).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".delete", false, true)) {
+        if (sPlayer.getRank(target).isEqualOrSuperiorTo(Rank.OWNER) || PermissionUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".delete", false, true)) {
             getDeletionConfirmation(sPlayer, target);
             SettlementMessenger.sendSettlementMessage(sender, new String[] {
                     "§4  Are you sure you want to do this?",
@@ -85,7 +88,7 @@ public class OwnerCommands implements LocalCommandExecutor, SettlementConstants 
             public void run() {
                 String sName = settlement.getName();
                 settlement.delete();
-                SettlementMessenger.sendSettlementMessage(sPlayer.getPlayer(), SettlementUtil.concatString("§2Settlement ", sName, " has been deleted!"));
+                SettlementMessenger.sendSettlementMessage(sPlayer.getPlayer(), StringUtil.concatString("§2Settlement ", sName, " has been deleted!"));
             }
         }, 400);
     }

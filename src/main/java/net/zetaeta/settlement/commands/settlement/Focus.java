@@ -1,6 +1,6 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -43,10 +43,11 @@ public class Focus extends SettlementCommand {
             return true;
         }
         CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"off"}, new String[] {"settlement"});
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         if (args.length == 0 || cArgs.hasBooleanFlag("off")) {
             SettlementMessenger.sendSettlementMessage(sender, "§2  Focus turned off!");
             sPlayer.setFocus(null);
+            return true;
         }
         Settlement focus = SettlementUtil.getStated(cArgs);
         if (focus == null) {

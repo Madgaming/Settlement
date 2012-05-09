@@ -2,6 +2,8 @@ package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
@@ -44,7 +46,7 @@ public class Info extends SettlementCommand {
                 SettlementMessenger.sendGlobalSettlementInfo(sender);
                 return true;
             }
-            if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+            if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
                 return true;
             }
             settlement.sendInfoMessage(sender);
@@ -52,13 +54,13 @@ public class Info extends SettlementCommand {
         }
         if (args.length == 0) {
             if (sender instanceof Player) {
-                SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+                SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
                 System.out.println(sPlayer.getName());
                 if (sPlayer.getFocus() == null) {
                     SettlementMessenger.sendGlobalSettlementInfo(sender);
                     return true;
                 }
-                if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+                if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
                     return true;
                 }
                 sPlayer.getFocus().sendInfoMessage(sender);
@@ -66,12 +68,12 @@ public class Info extends SettlementCommand {
             }
             SettlementMessenger.sendGlobalSettlementInfo(sender);
         }
-        Settlement settlement = server.getSettlement(SettlementUtil.arrayAsString(args));
+        Settlement settlement = server.getSettlement(StringUtil.arrayAsString(args));
         if (settlement == null) {
             SettlementMessenger.sendGlobalSettlementInfo(sender);
             return true;
         }
-        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+        if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         settlement.sendInfoMessage(sender);

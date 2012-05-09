@@ -2,8 +2,6 @@ package net.zetaeta.settlement;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,7 +11,6 @@ import net.zetaeta.libraries.commands.CommandsManager;
 import net.zetaeta.settlement.commands.SettlementCommandsManager;
 import net.zetaeta.settlement.listeners.SettlementBlockListener;
 import net.zetaeta.settlement.listeners.SettlementPlayerListener;
-import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.object.SettlementServer;
 
@@ -37,17 +34,15 @@ public class SettlementPlugin extends ManagedJavaPlugin {
     
     @Override
     public void onDisable() {
-        try {
-            server.saveSettlements();
+        if (ConfigurationConstants.useMultithreading && ConfigurationConstants.multithreadedShutdown) {
+            SettlementThreadManager.submitAsyncTask(new Runnable() {
+                public void run() {
+                    server.shutdown();
+                }
+            });
         }
-        catch (Throwable e) {
-            log.log(Level.SEVERE, "Error saving Settlements!", e);
-            e.printStackTrace();
-        }
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (SettlementPlayer.getSettlementPlayer(player) != null) {
-                SettlementPlayer.getSettlementPlayer(player).unregister();
-            }
+        else {
+            server.shutdown();
         }
     }
 
@@ -64,16 +59,7 @@ public class SettlementPlugin extends ManagedJavaPlugin {
         server = new SettlementServer(this);
         Future<?> settlementLoader = SettlementThreadManager.submitAsyncTask(new Runnable() {
             public void run() {
-                int settlementCount = server.loadSettlements();
-                log.info("Loaded" + settlementCount + "Settlements!");
-                int playerCount = 0;
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (!SettlementPlayer.playerMap.containsKey(player)) {
-                        new SettlementPlayer(player).register();
-                        ++playerCount;
-                    }
-                }
-                log.info("Loaded " + playerCount + " players!");
+                server.init();
             }
         });
         config = getConfig();

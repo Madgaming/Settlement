@@ -3,7 +3,9 @@ package net.zetaeta.settlement.commands.settlement;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
 import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
@@ -13,7 +15,7 @@ import net.zetaeta.settlement.util.SettlementUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Claims implements LocalCommandExecutor {
+public class Claims implements LocalCommandExecutor, SettlementConstants {
     
     @SuppressWarnings("static-access")
     @Command(aliases = {"claim", "acquire", "reappropriate"},
@@ -30,13 +32,13 @@ public class Claims implements LocalCommandExecutor {
         if (!SettlementUtil.checkCommandValid(sender, SettlementCommand.OWNER_PERMISSION + ".claim")) {
             return true;
         }
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         Settlement set = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (set == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".claim", false, true) || sPlayer.getRank(set).isEqualOrSuperiorTo(Rank.MODERATOR)) {
+        if (PermissionUtil.checkPermission(sender, SettlementCommand.ADMIN_OWNER_PERMISSION + ".claim", false, true) || sPlayer.getRank(set).isEqualOrSuperiorTo(Rank.MODERATOR)) {
             set.claimLand((Player) sender);
             return true;
         }
@@ -57,13 +59,13 @@ public class Claims implements LocalCommandExecutor {
             useCommandArguments = true,
             playersOnly = true)
     public boolean unClaim(CommandSender sender, CommandArguments args) {
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (settlement == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR) || SettlementUtil.checkPermission(sender, SettlementCommand.OWNER_PERMISSION + ".unclaim", false, true)) {
+        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR) || PermissionUtil.checkPermission(sender, SettlementCommand.OWNER_PERMISSION + ".unclaim", false, true)) {
             settlement.unclaimLand((Player) sender);
             return true;
         }

@@ -2,14 +2,11 @@ package net.zetaeta.settlement.object;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.Externalizable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,21 +18,16 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.zetaeta.settlement.FlatFileIO;
+import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlugin;
-import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.ToBeSaved;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class SettlementPlayer implements SettlementConstants {
-
-    public static final String SERVER_NAME = "$SERVER$";
-    public static Map<Player, SettlementPlayer> playerMap = new HashMap<Player, SettlementPlayer>();
-    
-    private static Set<SettlementPlayer> newPlayers = new HashSet<SettlementPlayer>();
-    
+    public static final SettlementPlayer NONE;
     @ToBeSaved
     private String name;
     @ToBeSaved 
@@ -49,55 +41,43 @@ public class SettlementPlayer implements SettlementConstants {
     private boolean confirmTimedOut = true;
     private boolean bypass;
     
+    static {
+        NONE = new SettlementPlayer() {
+            @Override
+            public boolean equals(Object other) {
+                return this == other;
+            }
+            public int hashCode() {
+                return "".hashCode() + 0x123;
+            }
+            
+        };
+    }
+    
+    private SettlementPlayer() {
+        name = "";
+    }
     
     public SettlementPlayer(Player plr) {
         player = plr;
         name = plr.getName();
     }
     
-    public static SettlementPlayer getSettlementPlayer(Player player) {
-        if (player == null) {
-            return null;
-        }
-        if (playerMap.containsKey(player))
-            return SettlementPlayer.playerMap.get(player);
-        SettlementPlayer sp = new SettlementPlayer(player);
-        sp.register();
-        return sp;
-    }
-    
-    public static SettlementPlayer getSettlementPlayer(String name) {
-        return getSettlementPlayer(Bukkit.getPlayer(name));
-    }
-    
-    public static Collection<SettlementPlayer> getOnlinePlayers() {
-        return playerMap.values();
-    }
-    
-    public static void loadPlayer(SettlementPlayer player) {
-        playerMap.put(Bukkit.getPlayer(player.getName()), player);
-        if (player.isSettlementMember()) {
-            for (Settlement s : player.getSettlements()) {
-                s.addMember(player);
-            }
-        }
-    }
-    
-    public void register() {
-        loadFromFile();
-        playerMap.put(player, this);
-        for (SettlementData data : settlementsInfo) {
-            data.getSettlement().addOnlinePlayer(this);
-        }
-    }
-    
-    public void unregister() {
-        saveToFile();
-        playerMap.remove(player);
-        for (SettlementData data : settlementsInfo) {
-            data.getSettlement().removeOnlinePlayer(this);
-        }
-    }
+//    public void register() {
+//        loadFromFile();
+//        server.registerPlayer(this);
+//        for (SettlementData data : settlementsInfo) {
+//            data.getSettlement().addOnlinePlayer(this);
+//        }
+//    }
+//    
+//    public void unregister() {
+//        saveToFile();
+//        server.unregisterPlayer(this);
+//        for (SettlementData data : settlementsInfo) {
+//            data.getSettlement().removeOnlinePlayer(this);
+//        }
+//    }
     
     protected void loadFromFile() {
         File playerFile = new File(SettlementPlugin.plugin.getPlayersFolder(), name + ".dat");
@@ -239,10 +219,6 @@ public class SettlementPlayer implements SettlementConstants {
         return null;
     }
     
-    class InvalidServerSettlementException extends Exception {
-        private static final long serialVersionUID = -5812285711090480100L;
-        
-    }
 
     /**
      * Associates the specified SettlementData with this player

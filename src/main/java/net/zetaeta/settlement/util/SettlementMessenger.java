@@ -1,5 +1,6 @@
 package net.zetaeta.settlement.util;
 
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.ConfigurationConstants;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.object.Settlement;
@@ -55,9 +56,11 @@ public class SettlementMessenger implements SettlementConstants {
      * @param message Message to be sent in String... form.
      */
     public static void sendSettlementMessage(CommandSender target, String... message) {
-        target.sendMessage(SETTLEMENT_MESSAGE_START);
+        synchronized (target) {
+            target.sendMessage(SETTLEMENT_MESSAGE_START);
         target.sendMessage(message);
         target.sendMessage(SETTLEMENT_MESSAGE_END);
+        }
     }
     /**
      * Sends the specified message to the target as a command help/usage message, using {@link #SETTLEMENT_USAGE_START} and {@link #SETTLEMENT_USAGE_END}.
@@ -66,9 +69,11 @@ public class SettlementMessenger implements SettlementConstants {
      * @param usage Usage/help message to send in String... form.
      */
     public static void sendUsage(CommandSender target, String... usage) {
-        target.sendMessage(SETTLEMENT_USAGE_START);
+        synchronized (target) {
+            target.sendMessage(SETTLEMENT_USAGE_START);
         target.sendMessage(usage);
         target.sendMessage(SETTLEMENT_USAGE_END);
+        }
     }
     
     /**
@@ -121,7 +126,7 @@ public class SettlementMessenger implements SettlementConstants {
     
     @SuppressWarnings("static-access")
     public static void sendPlotChangeMessage(CommandSender target, Settlement change) {
-        target.sendMessage(SettlementUtil.concatString(60, "  §b~ §6", change.getName(), " - §a", change.getSlogan().trim()));
+        target.sendMessage(StringUtil.concatString(60, "  §b~ §6", change.getName(), " - §a", change.getSlogan().trim()));
     }
     
     public static String makeColumns(int columns, String base, int style) {

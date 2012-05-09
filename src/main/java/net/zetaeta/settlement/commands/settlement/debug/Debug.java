@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.util.SettlementUtil;
@@ -58,7 +58,7 @@ public class Debug extends SettlementCommand {
                 return false;
             }
             try {
-                cache = targm.invoke(cache, ZPUtil.removeFirstIndex(args));
+                cache = targm.invoke(cache, Util.removeFirstIndex(args));
                 sender.sendMessage("Result of method " + targm.getName() + " of the cache, which is of class " + cache.getClass().getName() + " pushed onto cache!");
                 return true;
             } catch (IllegalAccessException e) {

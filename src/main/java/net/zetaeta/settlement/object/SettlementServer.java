@@ -22,25 +22,58 @@ import net.zetaeta.settlement.FlatFileIO;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.SettlementPlugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 public class SettlementServer implements SettlementConstants {
     private Map<String, Settlement> settlementsByName = new ConcurrentSkipListMap<String, Settlement>();
     private Map<Integer, Settlement> settlementsByUID = new ConcurrentHashMap<Integer, Settlement>();
+    private Map<Chunk, Settlement> settlementChunkCache;
+    private Map<Player, SettlementPlayer> playerMap = new HashMap<Player, SettlementPlayer>();
     private SettlementPlugin plugin;
     
     public SettlementServer(SettlementPlugin settlementPlugin) {
         plugin = settlementPlugin;
     }
     
+    public void init() {
+      int settlementCount = loadSettlements();
+      log.info("Loaded " + settlementCount + " Settlements!");
+      int playerCount = 0;
+      for (Player player : Bukkit.getOnlinePlayers()) {
+          if (server.getSettlementPlayer(player) == null) {
+              registerPlayer(new SettlementPlayer(player));
+              ++playerCount;
+          }
+      }
+      log.info("Loaded " + playerCount + " players!");
+    }
+    
+    public void shutdown() {
+        try {
+            saveSettlements();
+        }
+        catch (Throwable e) {
+            log.log(Level.SEVERE, "Error saving Settlements!", e);
+            e.printStackTrace();
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (server.getSettlementPlayer(player) != null) {
+                unregisterPlayer(getSettlementPlayer(player));
+            }
+        }
+    }
+    
     public void registerSettlement(Settlement settlement) {
         settlementsByName.put(settlement.getName().toLowerCase(), settlement);
         settlementsByUID.put(settlement.getUid(), settlement);
     }
+    
 
     public void unregisterSettlement(Settlement settlement) {
-        settlementsByName.remove(settlement.getName());
+        settlementsByName.remove(settlement.getName().toLowerCase());
         settlementsByUID.remove(settlement.getUid());
     }
 
@@ -131,6 +164,43 @@ public class SettlementServer implements SettlementConstants {
         }
     }
 
+
+    public SettlementPlayer getSettlementPlayer(Player player) {
+        if (player == null) {
+            return null;
+        }
+        if (playerMap.containsKey(player))
+            return playerMap.get(player);
+        SettlementPlayer sp = new SettlementPlayer(player);
+        registerPlayer(sp);
+        return sp;
+    }
+    
+    
+    public SettlementPlayer getSettlementPlayer(String name) {
+        return getSettlementPlayer(Bukkit.getPlayer(name));
+    }
+    
+    public Collection<SettlementPlayer> getOnlinePlayers() {
+        return playerMap.values();
+    }
+    
+    public void registerPlayer(SettlementPlayer player) {
+        player.loadFromFile();
+        playerMap.put(player.getPlayer(), player);
+        for (SettlementData data : player.getData()) {
+            data.getSettlement().addOnlinePlayer(player);
+        }
+    }
+    
+    public void unregisterPlayer(SettlementPlayer player) {
+        player.saveToFile();
+        playerMap.remove(player.getPlayer());
+        for (SettlementData data : player.getData()) {
+            data.getSettlement().removeOnlinePlayer(player);
+        }
+    }
+    
     /**
      * Loads all Settlements from ./Settlement/data/settlements.dat
      * @return 
@@ -158,11 +228,26 @@ public class SettlementServer implements SettlementConstants {
         int count = 0;
         try {
             if (dis.available() > 0) {
+                log.info("Bytes left to read: " + dis.available());
                 int version = dis.readInt();
+                log.info("Read version: " + version);
                 if (version == 0) {
                     while(dis.available() > 0) {
-                        FlatFileIO.loadSettlementV0_0(dis);
-                        ++count;
+                        log.info("Bytes left to read: " + dis.available());
+                        Settlement set = null;
+                        try {
+                            set = FlatFileIO.loadSettlementV0_0(dis);
+                            registerSettlement(set);
+                            ++count;
+                            log.info("Loaded settlement " + set.getName());
+                        }
+                        catch (Throwable thrown) {
+                            log.severe("Error occurred while loading settlement " + (set == null ? "" : set.getName()) + ": " + thrown.getClass().getName());
+                            log.log(Level.SEVERE, "Error loading settlements!", thrown);
+                            while (dis.readChar() != '\n') {
+                                
+                            }
+                        }
                     }
                 }
                 else {
@@ -210,14 +295,21 @@ public class SettlementServer implements SettlementConstants {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        for (Settlement settlement : settlementsByUID.values()) {
-//            if (!settlement.shouldSave)
-//                continue;
+        for (Iterator<Settlement> settlements = settlementsByUID.values().iterator(); settlements.hasNext();) {
+            Settlement settlement = settlements.next();
+            log.info("Saving settlement " + settlement.getName());
             try {
                 FlatFileIO.saveSettlementV0_0(settlement, dos);
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Error while saving Settlement " + settlement.getName() + "!", e);
                 e.printStackTrace();
+            }
+            if (settlements.hasNext()) {
+                try {
+                    dos.writeChar('\n');
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -234,7 +326,7 @@ public class SettlementServer implements SettlementConstants {
         do {
             possible = uidGen.nextInt();
         }
-        while (settlementsByUID.containsKey(possible));
+        while (settlementsByUID.containsKey(possible) && possible != 0);
         return possible;
     }
     
@@ -243,33 +335,20 @@ public class SettlementServer implements SettlementConstants {
         settlementsByName.put(newName, settlement);
     }
     
-    private Map<Chunk, Settlement> settlementCache;
     
     public Settlement getOwner(Chunk chunk) {
         if (ConfigurationConstants.useChunkOwnershipCacheing) {
-            if (settlementCache == null) {
-                settlementCache = new HashMap<Chunk, Settlement>((int) (ConfigurationConstants.chunkOwnershipCacheSize / 0.75));
+            if (settlementChunkCache == null) {
+                settlementChunkCache = new HashMap<Chunk, Settlement>((int) (ConfigurationConstants.chunkOwnershipCacheSize / 0.75));
             }
-            if (settlementCache.containsKey(chunk)) {
-                return settlementCache.get(chunk);
+            if (settlementChunkCache.containsKey(chunk)) {
+                return settlementChunkCache.get(chunk);
             }
         }
-//        if (ConfigurationConstants.useSettlementWorldCacheing) {
-//            for (Settlement settlement : Settlement.getSettlementsIn(chunk.getWorld())) {
-//                if (settlement.ownsChunk(chunk)) {
-//                    if (ConfigurationConstants.useChunkOwnershipCacheing) {
-//                        settlementCache.put(chunk, settlement);
-//                    }
-//                    return settlement;
-//                }
-//            }
-//            return null;
-//        }
-//        else {
             for (Settlement settlement : server.getSettlements()) {
                 if (settlement.ownsChunk(chunk)) {
                     if (ConfigurationConstants.useChunkOwnershipCacheing) {
-                        settlementCache.put(chunk, settlement);
+                        settlementChunkCache.put(chunk, settlement);
                     }
                     return settlement;
                 }
@@ -279,10 +358,10 @@ public class SettlementServer implements SettlementConstants {
     }
     
     public void clearFromChunkCache(Settlement settlement) {
-        if (settlementCache == null) {
+        if (settlementChunkCache == null) {
             return;
         }
-        for (Iterator<Settlement> setIt = settlementCache.values().iterator(); setIt.hasNext();) {
+        for (Iterator<Settlement> setIt = settlementChunkCache.values().iterator(); setIt.hasNext();) {
             if (setIt.next().equals(settlement)) {
                 setIt.remove();
             }
@@ -290,9 +369,9 @@ public class SettlementServer implements SettlementConstants {
     }
     
     public void clearFromChunkCache(Chunk chunk) {
-        if (settlementCache == null) {
+        if (settlementChunkCache == null) {
             return;
         }
-        settlementCache.remove(chunk);
+        settlementChunkCache.remove(chunk);
     }
 }

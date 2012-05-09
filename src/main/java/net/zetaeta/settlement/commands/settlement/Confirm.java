@@ -32,7 +32,7 @@ public class Confirm extends SettlementCommand {
         if (args.length != 0) {
             SettlementMessenger.sendUsage(sender, usage);
         }
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         if (sPlayer.hasConfirmTimedOut()) {
             SettlementMessenger.sendSettlementMessage(sender, "§cYou do not have anything to confirm!");
             return true;

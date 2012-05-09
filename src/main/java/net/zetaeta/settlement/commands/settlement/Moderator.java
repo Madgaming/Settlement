@@ -1,19 +1,21 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
 import net.zetaeta.settlement.util.SettlementUtil;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class Moderator extends SettlementCommand implements LocalCommandExecutor {
     public static final String MODERATOR_PERMISSION = OWNER_PERMISSION + ".moderator";
@@ -51,7 +53,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
         if (uArgs.length == 0) {
             return false;
         }
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (settlement == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
@@ -59,22 +61,22 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
         }
         SettlementPlayer target;
         if (args.hasBooleanFlag("e") || args.hasBooleanFlag("exact")) {
-            target = SettlementPlayer.getSettlementPlayer(Bukkit.getPlayerExact(uArgs[0]));
+            target = server.getSettlementPlayer(Bukkit.getPlayerExact(uArgs[0]));
         }
         else {
-            target = SettlementPlayer.getSettlementPlayer(Bukkit.getPlayer(uArgs[0]));
+            target = server.getSettlementPlayer(Bukkit.getPlayer(uArgs[0]));
         }
         if (target == null) {
             SettlementMessenger.sendInvalidPlayerMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
+        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || PermissionUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
             if (!settlement.isMember(sPlayer)) {
-                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a member of the Settlement §6", settlement.getName(), "§c!"));
+                SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a member of the Settlement §6", settlement.getName(), "§c!"));
                 return true;
             }
             if (settlement.isModerator(target)) {
-                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(120, "§c  The player §b", target.getName(), " §cis already a moderator of the Settlement §6", settlement.getName(), "§c!"));
+                SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(120, "§c  The player §b", target.getName(), " §cis already a moderator of the Settlement §6", settlement.getName(), "§c!"));
                 return true;
             }
             settlement.addModerator(target);
@@ -82,7 +84,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
                 SettlementMessenger.sendSettlementMessage(target.getPlayer(), "§b  You §awere demoted from moderator in the settlement §6" + settlement.getName());
                 return true;
             }
-            settlement.broadcastSettlementMessage(SettlementUtil.concatString("§a  The player §b", target.getName(), " §awas promoted to moderator!"));
+            settlement.broadcastSettlementMessage(StringUtil.concatString("§a  The player §b", target.getName(), " §awas promoted to moderator!"));
             return true;
         }
         settlement.sendNoRightsMessage(sender);
@@ -105,7 +107,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
         if (uArgs.length == 0) {
             return false;
         }
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (settlement == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
@@ -113,18 +115,18 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
         }
         SettlementPlayer target;
         if (args.hasBooleanFlag("e") || args.hasBooleanFlag("exact")) {
-            target = SettlementPlayer.getSettlementPlayer(Bukkit.getPlayerExact(uArgs[0]));
+            target = server.getSettlementPlayer(Bukkit.getPlayerExact(uArgs[0]));
         }
         else {
-            target = SettlementPlayer.getSettlementPlayer(Bukkit.getPlayer(uArgs[0]));
+            target = server.getSettlementPlayer(Bukkit.getPlayer(uArgs[0]));
         }
         if (target == null) {
             SettlementMessenger.sendInvalidPlayerMessage(sender);
             return true;
         }
-        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || SettlementUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
+        if (sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.OWNER) || PermissionUtil.checkPermission(sender, MODERATOR_PERMISSION + ".add", false, true)) {
             if (!settlement.isModerator(target)) {
-                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a moderator in the settlement §6", settlement.getName(), "§c!"));
+                SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(115, "§c  The player §b", target.getName(), " §cis not a moderator in the settlement §6", settlement.getName(), "§c!"));
                 return true;
             }
             settlement.removeModerator(target);
@@ -132,7 +134,7 @@ public class Moderator extends SettlementCommand implements LocalCommandExecutor
                 SettlementMessenger.sendSettlementMessage(target.getPlayer(), "§b  You §awere demoted from moderator in the settlement §6" + settlement.getName());
                 return true;
             }
-            settlement.broadcastSettlementMessage(SettlementUtil.concatString("§a  The player §b", target.getName(), " §awas demoted from moderator!"));
+            settlement.broadcastSettlementMessage(StringUtil.concatString("§a  The player §b", target.getName(), " §awas demoted from moderator!"));
             return true;
         }
         settlement.sendNoRightsMessage(sender);

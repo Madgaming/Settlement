@@ -5,7 +5,6 @@ import net.zetaeta.settlement.SettlementPlugin;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
-import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -21,10 +20,10 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
     @SuppressWarnings("static-method")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(final PlayerLoginEvent event) {
-        if(!SettlementPlayer.playerMap.containsKey(event.getPlayer())) {
+        if(server.getSettlementPlayer(event.getPlayer()) == null) {
             Bukkit.getScheduler().scheduleAsyncDelayedTask(SettlementPlugin.plugin, new Runnable() {
                 public void run() {
-                    new SettlementPlayer(event.getPlayer()).register();
+                    server.registerPlayer(new SettlementPlayer(event.getPlayer()));
                 }
             });
         }
@@ -35,7 +34,7 @@ public class SettlementPlayerListener implements Listener, SettlementConstants {
     
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogout(PlayerQuitEvent event) {
-        SettlementPlayer.getSettlementPlayer(event.getPlayer()).unregister();
+        server.unregisterPlayer(server.getSettlementPlayer(event.getPlayer()));
     }
     
     @EventHandler(priority = EventPriority.MONITOR)

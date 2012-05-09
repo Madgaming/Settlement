@@ -1,30 +1,18 @@
 package net.zetaeta.settlement.object;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Level;
 
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.ConfigurationConstants;
-import net.zetaeta.settlement.FlatFileIO;
-import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.Rank;
+import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.ToBeSaved;
 import net.zetaeta.settlement.commands.settlement.Info;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -48,6 +36,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
 
 //    private static Map<World, Collection<Settlement>> settlementsByWorld;
     
+    public static final Settlement WILDERNESS;
     @ToBeSaved
     private int bonusPlots;
     @ToBeSaved
@@ -77,6 +66,16 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     private String playerListCache;
     private boolean updatePLCache = true;
     
+    static {
+        WILDERNESS = new Settlement("Wilderness");
+    }
+    
+    public Settlement(String name) {
+        owner = SettlementPlayer.NONE;
+        this.UID = 0;
+        this.name = name;
+    }
+    
     /**
      * Standard settlement constructor
      * 
@@ -95,7 +94,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
 //        settlementsByName.put(name, this);
 //        settlementsByUID.put(UID, this);
         allowedPlots = ConfigurationConstants.plotsPerPlayer;
-        server.registerSettlement(this);
+//        server.registerSettlement(this);
 //        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
 //            settlementsByWorld = new HashMap<World, Collection<Settlement>>();
 //        }
@@ -109,7 +108,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         this.name = name;
         this.UID = uid;
         slogan = "§e  Use /settlement slogan <slogan> to set the slogan!";
-        server.registerSettlement(this);
+//        server.registerSettlement(this);
 //        settlementsByName.put(name, this);
 //        settlementsByUID.put(UID, this);
 //        if (ConfigurationConstants.useSettlementWorldCacheing && settlementsByWorld == null) {
@@ -378,7 +377,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     @SuppressWarnings("static-access")
     public void sendMessage(CommandSender target, String... message) {
         System.out.println(name);
-        target.sendMessage(SettlementUtil.concatString(40, SettlementMessenger.SETTLEMENT_MESSAGE_START_LEFT + " §6", name, " ", SettlementMessenger.SETTLEMENT_MESSAGE_START_RIGHT));
+        target.sendMessage(StringUtil.concatString(40, SettlementMessenger.SETTLEMENT_MESSAGE_START_LEFT + " §6", name, " ", SettlementMessenger.SETTLEMENT_MESSAGE_START_RIGHT));
         target.sendMessage(message);
         target.sendMessage(SettlementMessenger.SETTLEMENT_MESSAGE_END);
     }
@@ -407,7 +406,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         info.add("§2 - §a".concat(slogan == null ? "null" : slogan));
         info.add("§2 Owner: ".concat(owner == null ? (ownerName == null ? "owner&name = null" : ownerName) : (owner.getPlayer() == null ? "ownerPlayer = null" : owner.getPlayer().getDisplayName()) ));
         if (moderators.size() > 0) {
-            info.add(SettlementUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", SettlementUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
+            info.add(StringUtil.concatString((moderators.size() << 4) + 18, "§2 Moderators: ", StringUtil.arrayAsCommaString(moderators.toArray(new String[moderators.size()]))));
         }
         info.add("§2  Plots: " + plots.size() + '/' + allowedPlots);
         info.add(getColouredPlayerList("§a", "§c"));
@@ -431,14 +430,14 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             int i = 0;
             for (Iterator<String> listIt = members.iterator(); listIt.hasNext(); ++i) {
                 String name = listIt.next();
-                if (SettlementPlayer.getSettlementPlayer(name) != null) {
+                if (server.getSettlementPlayer(name) != null) {
                     plArray[i] = onlineColour + name;
                 }
                 else {
                     plArray[i] = offlineColour + name;
                 }
             }
-            return SettlementUtil.concatString(15 + (members.size() * 18), "§2 Players: ", SettlementUtil.arrayAsCommaString(plArray), ".");
+            return StringUtil.concatString(15 + (members.size() * 18), "§2 Players: ", StringUtil.arrayAsCommaString(plArray), ".");
         }
         return playerListCache;
     }
@@ -454,7 +453,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         for (SettlementPlayer sPlayer : onlineMembers) {
             sPlayer.removeSettlement(this);
         }
-        for (SettlementPlayer sPlayer : SettlementPlayer.getOnlinePlayers()) {
+        for (SettlementPlayer sPlayer : server.getOnlinePlayers()) {
             if (sPlayer.getFocus() == this) {
                 sPlayer.setFocus(null);
             }
@@ -491,8 +490,8 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     public void addMember(String newMemberName) {
         baseMembers.add(newMemberName);
         members.add(newMemberName);
-        if (SettlementPlayer.getSettlementPlayer(newMemberName) != null) {
-            onlineMembers.add(SettlementPlayer.getSettlementPlayer(newMemberName));
+        if (server.getSettlementPlayer(newMemberName) != null) {
+            onlineMembers.add(server.getSettlementPlayer(newMemberName));
         }
     }
     
@@ -504,6 +503,26 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      */
     public boolean isMember(SettlementPlayer sPlayer) {
         return onlineMembers.contains(sPlayer);
+    }
+    
+    public SettlementPlayer getMember(String name) {
+        String lowerName = name.toLowerCase();
+        SettlementPlayer result = null;
+        int length = Integer.MAX_VALUE;
+        for (SettlementPlayer poss : onlineMembers) {
+            String possLower = poss.getName().toLowerCase();
+            if (possLower.startsWith(lowerName)) {
+                int currlength = possLower.length() - name.length();
+                if (currlength < length) {
+                    length = currlength;
+                    result = poss;
+                }
+                if (length == 0) {
+                    break;
+                }
+            }
+        }
+        return result;
     }
     
     /**
@@ -533,6 +552,18 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         onlineMembers.remove(oldMember);
         oldMember.removeSettlement(this);
         updateClaimablePlots();
+    }
+    
+    public void removeMember(String oldMemberName) {
+        SettlementPlayer sp;
+        if ((sp = server.getSettlementPlayer(oldMemberName)) != null) {
+            removeMember(sp);
+        }
+        else {
+            members.remove(oldMemberName);
+            baseMembers.remove(oldMemberName);
+            moderators.remove(oldMemberName);
+        }
     }
     
     /**
@@ -573,16 +604,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             return false;
         }
         plots.add(chunk);
-//        if (ConfigurationConstants.useSettlementWorldCacheing) {
-//            if (settlementsByWorld == null) {
-//                settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-//            }
-//            if (settlementsByWorld.get(chunk.getWorld()) == null) {
-//                settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
-//            }
-//            settlementsByWorld.get(chunk.getWorld()).add(this);
-//        }
-        broadcastSettlementMessage(SettlementUtil.concatString("§a  ", cause.getName(), " claimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
+        broadcastSettlementMessage(StringUtil.concatString("§a  ", cause.getName(), " claimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
     
@@ -596,22 +618,13 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
         }
         plots.remove(chunk);
         server.clearFromChunkCache(chunk);
-        broadcastSettlementMessage(SettlementUtil.concatString("§a  ", cause.getName(), " unclaimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
+        broadcastSettlementMessage(StringUtil.concatString("§a  ", cause.getName(), " unclaimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
     
     public boolean addChunk(Chunk chunk) {
         plots.add(chunk);
         if (ConfigurationConstants.useSettlementWorldCacheing) {
-//            if (ConfigurationConstants.useSettlementWorldCacheing) {
-//                if (settlementsByWorld == null) {
-//                    settlementsByWorld = new HashMap<World, Collection<Settlement>>();
-//                }
-//                if (settlementsByWorld.get(chunk.getWorld()) == null) {
-//                    settlementsByWorld.put(chunk.getWorld(), new HashSet<Settlement>());
-//                }
-//                settlementsByWorld.get(chunk.getWorld()).add(this);
-//            }
         }
         return true;
     }

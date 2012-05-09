@@ -66,7 +66,7 @@ public final class FlatFileIO implements SettlementConstants {
         else {
             dos.writeChar('|');
         }
-        if (ConfigurationConstants.useSettlementWorldCacheing) {// && set.worldPlots != null) {
+        //if (ConfigurationConstants.useSettlementWorldCacheing) {// && set.worldPlots != null) {
 //            if (set.worldPlots.size() > 0) {
 //                dos.writeChar('{');
 //                for (World wrld : set.worldPlots.keySet()) {
@@ -93,7 +93,7 @@ public final class FlatFileIO implements SettlementConstants {
 //            else {
 //                dos.writeChar('|');
 //            }
-        } else {
+        /*} else*/ {
             if (set.getPlots().size() > 0) {
                 if (reusableWorldPlots == null) {
                     reusableWorldPlots = new HashMap<World, Collection<Chunk>>();
@@ -130,8 +130,6 @@ public final class FlatFileIO implements SettlementConstants {
                 dos.writeChar('|');
             }
         }
-            
-        dos.writeChar('\n');
     }
     
     public static Settlement loadSettlementV0_0(DataInputStream dis) throws IOException {
@@ -171,6 +169,7 @@ public final class FlatFileIO implements SettlementConstants {
         c = dis.readChar(); // | or {
         log.info("About to read members, char = " + String.valueOf(c));
         while (c != '|' && c != '}') {
+            log.info("Started reading member loop");
             String s = dis.readUTF();
             log.info("Adding member: " + s);
             set.addMember(s);
@@ -201,7 +200,7 @@ public final class FlatFileIO implements SettlementConstants {
             dis.readChar();
             c = dis.readChar();
         }
-        dis.readChar(); // \n
+//        dis.readChar(); // \n
         set.updateMembers();
         set.updateClaimablePlots();
         return set;

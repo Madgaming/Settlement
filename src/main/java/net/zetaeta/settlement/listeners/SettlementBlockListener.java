@@ -23,7 +23,7 @@ public class SettlementBlockListener implements Listener, SettlementConstants {
         if (plotOwner.isMember(event.getPlayer().getName())) {
             return;
         }
-        if (SettlementPlayer.getSettlementPlayer(event.getPlayer()).hasBypass()) {
+        if (server.getSettlementPlayer(event.getPlayer()).hasBypass()) {
             return;
         }
         event.getPlayer().sendMessage(ConfigurationConstants.denyBreakMessage.replace("%s", plotOwner.getName()));
@@ -39,7 +39,7 @@ public class SettlementBlockListener implements Listener, SettlementConstants {
         if (plotOwner.isMember(event.getPlayer().getName())) {
             return;
         }
-        if (SettlementPlayer.getSettlementPlayer(event.getPlayer()).hasBypass()) {
+        if (server.getSettlementPlayer(event.getPlayer()).hasBypass()) {
             return;
         }
         event.getPlayer().sendMessage(ConfigurationConstants.denyBuildMessage.replace("%s", plotOwner.getName()));

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import net.zetaeta.libraries.commands.local.LocalCommand;
+import net.zetaeta.libraries.util.PermissionUtil;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.util.SettlementMessenger;
-import net.zetaeta.settlement.util.SettlementUtil;
 
 import org.bukkit.command.CommandSender;
 
@@ -29,7 +29,7 @@ public class Help extends SettlementCommand {
     
     @SuppressWarnings("static-access")
     public boolean execute(CommandSender sender, String alias, String[] args) {
-        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+        if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         if (args.length == 0) {

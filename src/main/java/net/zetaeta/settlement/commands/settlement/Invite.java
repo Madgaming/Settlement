@@ -1,11 +1,10 @@
 package net.zetaeta.settlement.commands.settlement;
 
-import static net.zetaeta.libraries.ZPUtil.concatString;
 import static net.zetaeta.settlement.util.SettlementMessenger.sendSettlementMessage;
 import net.zetaeta.libraries.commands.CommandArguments;
-import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
-import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.Settlement;
@@ -45,7 +44,7 @@ public class Invite extends SettlementCommand {
         if (trySubCommand(sender, alias, args)) {
             return true;
         }
-        if (!SettlementUtil.checkPermission(sender, permission, true, true)) {
+        if (!PermissionUtil.checkPermission(sender, permission, true, true)) {
             return true;
         }
         CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"exact", "e"}, new String[] {"settlement"}, sender);
@@ -58,7 +57,7 @@ public class Invite extends SettlementCommand {
             return true;
         }
         if (sender instanceof Player) {
-            sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+            sPlayer = server.getSettlementPlayer((Player) sender);
         }
         else {
             sender.sendMessage("§cThis command can only be run by a player!");
@@ -66,16 +65,16 @@ public class Invite extends SettlementCommand {
         }
         Settlement invitedTo = SettlementUtil.getFocusedOrStated(sPlayer, cArgs);
         if (invitedTo != null) {
-            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(Rank.MODERATOR) && !SettlementUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
+            if (!sPlayer.getRank(invitedTo).isEqualOrSuperiorTo(Rank.MODERATOR) && !PermissionUtil.checkPermission(sender, ADMIN_OWNER_PERMISSION + ".invite", true, true)) {
                 invitedTo.sendNoRightsMessage(sender);
                 return true;
             }
             if (cArgs.hasBooleanFlag("e") || cArgs.hasBooleanFlag("exact")) { // exact name
                 
                 invitedTo.addInvitation(newArgs[0]);
-                sendSettlementMessage(sender, concatString("§b  You §ahave invited ", newArgs[0], " to your Settlement, ", invitedTo.getName()));
+                sendSettlementMessage(sender, StringUtil.concatString("§b  You §ahave invited ", newArgs[0], " to your Settlement, ", invitedTo.getName()));
                 if (Bukkit.getPlayerExact(newArgs[0]) != null) {
-                    sendSettlementMessage(Bukkit.getPlayerExact(newArgs[0]), concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
+                    sendSettlementMessage(Bukkit.getPlayerExact(newArgs[0]), StringUtil.concatString("§2", sender.getName(), " has invited you to the Settlement ", invitedTo.getName(), "!"));
                 }
                 return true;
             }
@@ -83,8 +82,8 @@ public class Invite extends SettlementCommand {
                 if (Bukkit.getPlayer(newArgs[0]) != null) {
                     Player invitee = Bukkit.getPlayer(newArgs[0]);
                     invitedTo.addInvitation(invitee.getName());
-                    sendSettlementMessage(sender, concatString("§b  You §2have invited §b", invitee.getName(), " §2to your Settlement, §6", invitedTo.getName(), "§2!"));
-                    sendSettlementMessage(invitee, concatString("§b  ", sender.getName(), " §2has invited you to the Settlement §6", invitedTo.getName(), "§2!"));
+                    sendSettlementMessage(sender, StringUtil.concatString("§b  You §2have invited §b", invitee.getName(), " §2to your Settlement, §6", invitedTo.getName(), "§2!"));
+                    sendSettlementMessage(invitee, StringUtil.concatString("§b  ", sender.getName(), " §2has invited you to the Settlement §6", invitedTo.getName(), "§2!"));
                     return true;
                 }
                 sender.sendMessage("§cNot an online player!");

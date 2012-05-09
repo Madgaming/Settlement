@@ -2,6 +2,8 @@ package net.zetaeta.settlement.commands.settlement;
 
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.LocalCommand;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.commands.SettlementCommand;
 import net.zetaeta.settlement.object.SettlementPlayer;
 import net.zetaeta.settlement.util.SettlementMessenger;
@@ -35,13 +37,13 @@ public class Bypass extends SettlementCommand {
         }
         CommandArguments cArgs = CommandArguments.processArguments(alias, args, new String[] {"on", "off"}, new String[0]);
         args = cArgs.getUnprocessedArgArray();
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer((Player) sender);
+        SettlementPlayer sPlayer = server.getSettlementPlayer((Player) sender);
         if (args.length > 0 && Bukkit.getPlayer(args[0]) != null) {
-            if (!SettlementUtil.checkPermission(sender, permission + ".other", true, true)) {
+            if (!PermissionUtil.checkPermission(sender, permission + ".other", true, true)) {
                 SettlementMessenger.sendSettlementMessage(sender, "§c  You are not allowed to set bypass for other players!");
                 return true;
             }
-            SettlementPlayer target = SettlementPlayer.getSettlementPlayer(Bukkit.getPlayer(args[0]));
+            SettlementPlayer target = server.getSettlementPlayer(Bukkit.getPlayer(args[0]));
             if (cArgs.hasBooleanFlag("on") || (args.length > 1 && args[1].equalsIgnoreCase("on"))) {
                 target.setBypass(true);
                 SettlementMessenger.sendSettlementMessage(sender, "§a  Settlement protection bypass enabled for §b" + target.getName());
@@ -55,7 +57,7 @@ public class Bypass extends SettlementCommand {
                 return true;
             }
             target.setBypass(!target.hasBypass());
-            SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§a  Settlement protection bypass for §b", target.getName(), " §achanged to ", String.valueOf(target.hasBypass()), "!"));
+            SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(80, "§a  Settlement protection bypass for §b", target.getName(), " §achanged to ", String.valueOf(target.hasBypass()), "!"));
             SettlementMessenger.sendSettlementMessage(target.getPlayer(), "§a  Settlement protection bypass changed to " + String.valueOf(target.hasBypass()) + "!");
             return true;
         }

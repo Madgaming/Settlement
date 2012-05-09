@@ -27,12 +27,10 @@ public class ReloadSettlementData extends SettlementCommand {
             }
             for (String plNm : settlement.getMemberNames()) {
                 SettlementPlayer player;
-                if ((player = SettlementPlayer.getSettlementPlayer(plNm)) != null) {
+                if ((player = server.getSettlementPlayer(plNm)) != null) {
                     player.setRank(settlement, (settlement.getOwner() == player ? Rank.OWNER : (settlement.getModeratorNames().contains(player.getName()) ? Rank.MODERATOR : Rank.MEMBER)));
                 }
             }
-        }
-        for (SettlementPlayer player : SettlementPlayer.getOnlinePlayers()) {
         }
         return true;
     }

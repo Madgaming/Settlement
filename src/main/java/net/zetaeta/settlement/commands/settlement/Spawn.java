@@ -3,6 +3,8 @@ package net.zetaeta.settlement.commands.settlement;
 import net.zetaeta.libraries.commands.CommandArguments;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.PermissionUtil;
+import net.zetaeta.libraries.util.StringUtil;
 import net.zetaeta.settlement.Rank;
 import net.zetaeta.settlement.SettlementConstants;
 import net.zetaeta.settlement.commands.SettlementCommand;
@@ -28,7 +30,7 @@ public class Spawn implements LocalCommandExecutor, SettlementConstants {
     )
     public boolean spawn(CommandSender sender, CommandArguments args) {
         Player player = (Player) sender;
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(player);
+        SettlementPlayer sPlayer = server.getSettlementPlayer(player);
         Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (settlement == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
@@ -50,20 +52,20 @@ public class Spawn implements LocalCommandExecutor, SettlementConstants {
     )
     public boolean setSpawn(CommandSender sender, CommandArguments args) {
         Player player = (Player) sender;
-        SettlementPlayer sPlayer = SettlementPlayer.getSettlementPlayer(player);
+        SettlementPlayer sPlayer = server.getSettlementPlayer(player);
         Settlement settlement = SettlementUtil.getFocusedOrStated(sPlayer, args);
         if (settlement == null) {
             SettlementMessenger.sendInvalidSettlementMessage(sender);
             return true;
         }
-        if (SettlementUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
+        if (PermissionUtil.checkPermission(sender, Set.SET_ADMIN_PERMISSION + ".spawn", false, true) || sPlayer.getRank(settlement).isEqualOrSuperiorTo(Rank.MODERATOR)) {
             if (!settlement.equals(server.getOwner(player.getLocation().getChunk()))) {
-                SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
+                SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(80, "§c  The settlement §6", settlement.getName(), " §cdoes not own this plot!"));
                 return true;
             }
             Location loc = player.getLocation();
             settlement.setSpawn(loc);
-            SettlementMessenger.sendSettlementMessage(sender, SettlementUtil.concatString(125, "§b  You §aset the spawn of §6", settlement.getName(), "§a to x=", loc.getBlockX(), ", y=", loc.getBlockY(), ", z=", loc.getBlockZ(), " in world ", loc.getWorld().getName(), "!"));
+            SettlementMessenger.sendSettlementMessage(sender, StringUtil.concatString(125, "§b  You §aset the spawn of §6", settlement.getName(), "§a to x=", loc.getBlockX(), ", y=", loc.getBlockY(), ", z=", loc.getBlockZ(), " in world ", loc.getWorld().getName(), "!"));
             return true;
         }
         settlement.sendNoRightsMessage(sender);

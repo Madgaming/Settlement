@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.zetaeta.libraries.ZPUtil;
+import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.local.AbstractLocalCommandExecutor;
 import net.zetaeta.libraries.commands.local.Command;
 import net.zetaeta.libraries.commands.local.LocalCommand;
@@ -44,7 +44,7 @@ public class SettlementCommand extends AbstractLocalCommandExecutor implements S
         if (args.length > 0) {
             for (String s : subCommands.keySet()) {
                 if (s.equalsIgnoreCase(args[0])) {
-                    return subCommands.get(args[0]).execute(sender, alias, ZPUtil.removeFirstIndex(args));
+                    return subCommands.get(args[0]).execute(sender, alias, Util.removeFirstIndex(args));
                 }
             }
             return false;
