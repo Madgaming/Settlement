@@ -11,12 +11,12 @@ import net.zetaeta.libraries.commands.CommandsManager;
 import net.zetaeta.settlement.commands.SettlementCommandsManager;
 import net.zetaeta.settlement.listeners.SettlementBlockListener;
 import net.zetaeta.settlement.listeners.SettlementPlayerListener;
-import net.zetaeta.settlement.object.SettlementPlayer;
+import net.zetaeta.settlement.listeners.SettlementWorldListener;
 import net.zetaeta.settlement.object.SettlementServer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
 public class SettlementPlugin extends ManagedJavaPlugin {
@@ -62,10 +62,12 @@ public class SettlementPlugin extends ManagedJavaPlugin {
                 server.init();
             }
         });
+        log.info(getDescription().getLoad().toString());
         config = getConfig();
         pm = getServer().getPluginManager();
         pm.registerEvents(new SettlementPlayerListener(), this);
         pm.registerEvents(new SettlementBlockListener(), this);
+        pm.registerEvents(new SettlementWorldListener(), this);
         commandsManager = new CommandsManager(this);
         sCommandExec = new SettlementCommandsManager();
         try {
@@ -94,6 +96,18 @@ public class SettlementPlugin extends ManagedJavaPlugin {
     
     public File getPlayersFolder() {
         File pFolder = new File(getSavedDataFolder(), "players");
+        pFolder.mkdirs();
+        return pFolder;
+    }
+    
+    public File getSettlementsFolder() {
+        File sFolder = new File(getSavedDataFolder(), "settlements");
+        sFolder.mkdirs();
+        return sFolder;
+    }
+    
+    public File getPlotsFolder() {
+        File pFolder = new File(getSavedDataFolder(), "plots");
         pFolder.mkdirs();
         return pFolder;
     }

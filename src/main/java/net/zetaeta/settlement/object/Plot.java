@@ -1,31 +1,53 @@
 package net.zetaeta.settlement.object;
 
+import net.zetaeta.settlement.SettlementConstants;
+
 import org.bukkit.Chunk;
 
-public class Plot {
-    private Chunk chunk;
+public class Plot implements SettlementConstants {
+    private ChunkCoordinate location;
     private SettlementWorld world;
     private Settlement ownerSettlement;
-    private SettlementPlayer ownerPlayer;
+//    private SettlementPlayer ownerPlayer;
+    private String ownerPlayerName;
     
-    public Plot(SettlementWorld world, Chunk chunk) {
+    public Plot(SettlementWorld world, ChunkCoordinate cc) {
         this.world = world;
-        this.chunk = chunk;
+        this.location = cc;
         ownerSettlement = Settlement.WILDERNESS;
-        ownerPlayer = SettlementPlayer.NONE;
+        ownerPlayerName = "";
     }
     
     public Chunk getChunk() {
-        return chunk;
+        return world.getChunk(location);
     }
     
     public Settlement getOwnerSettlement() {
         return ownerSettlement;
     }
     
-    public SettlementPlayer getOwnerPlayer() {
-        return ownerPlayer;
+    public void setOwnerSettlement(Settlement owner) {
+        ownerSettlement = owner;
     }
     
+    public SettlementPlayer getOwnerPlayer() {
+        return server.getSettlementPlayer(ownerPlayerName);
+    }
     
+    public void setOwnerPlayer(SettlementPlayer owner) {
+        ownerPlayerName = owner.getName();
+    }
+    
+    public void setOwnerPlayer(String ownerName) {
+        ownerPlayerName = ownerName;
+    }
+    
+    public ChunkCoordinate getCoordinates() {
+        return location;
+    }
+
+    public SettlementWorld getWorld() {
+        return world;
+    }
+
 }

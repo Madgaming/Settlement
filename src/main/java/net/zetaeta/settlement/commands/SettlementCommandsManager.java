@@ -16,7 +16,9 @@ import net.zetaeta.libraries.Util;
 import net.zetaeta.libraries.commands.DynamicCommandExecutor;
 import net.zetaeta.libraries.commands.local.LocalCommand;
 import net.zetaeta.libraries.commands.local.LocalCommandExecutor;
+import net.zetaeta.libraries.util.ReflectionUtil;
 import net.zetaeta.settlement.SettlementConstants;
+import net.zetaeta.settlement.SettlementThreadManager;
 import net.zetaeta.settlement.commands.settlement.Bypass;
 import net.zetaeta.settlement.commands.settlement.Claims;
 import net.zetaeta.settlement.commands.settlement.Confirm;
@@ -87,10 +89,25 @@ public class SettlementCommandsManager extends DynamicCommandExecutor implements
                                             usage = "",
                                             description = ""
             )
-    public boolean settlementCommand(CommandSender sender, Command command, String cmdlbl, String[] args) {
+    public boolean settlementCommand(final CommandSender sender, Command command, String cmdlbl, final String[] args) {
         if (args.length >= 1) {
             if (subCommands.containsKey(args[0].toLowerCase())) {
-                LocalCommand sc = subCommands.get(args[0]);
+                final LocalCommand sc = subCommands.get(args[0]);
+                try {
+                    if (sc.getClass().getMethod("execute", CommandSender.class, String.class, String[].class).isAnnotationPresent(Multithreaded.class)) {
+                        SettlementThreadManager.submitAsyncTask(new Runnable() {
+                            public void run() {
+                                if (!sc.execute(sender, args[0], removeFirstIndex(args))) {
+                                    SettlementMessenger.sendUsage(sender, sc.getUsage());
+                                }
+                            }
+                        });
+                        return true;
+                    }
+                } catch (NoSuchMethodException | SecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 if (sc.execute(sender, args[0], removeFirstIndex(args))) {
                     return true;
                 }

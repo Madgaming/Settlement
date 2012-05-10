@@ -30,8 +30,9 @@ import org.bukkit.entity.Player;
 public class SettlementServer implements SettlementConstants {
     private Map<String, Settlement> settlementsByName = new ConcurrentSkipListMap<String, Settlement>();
     private Map<Integer, Settlement> settlementsByUID = new ConcurrentHashMap<Integer, Settlement>();
+    private Map<World, SettlementWorld> worlds = new ConcurrentHashMap<World, SettlementWorld>();
     private Map<Chunk, Settlement> settlementChunkCache;
-    private Map<Player, SettlementPlayer> playerMap = new HashMap<Player, SettlementPlayer>();
+    private Map<Player, SettlementPlayer> players = new HashMap<Player, SettlementPlayer>();
     private SettlementPlugin plugin;
     
     public SettlementServer(SettlementPlugin settlementPlugin) {
@@ -47,6 +48,9 @@ public class SettlementServer implements SettlementConstants {
               registerPlayer(new SettlementPlayer(player));
               ++playerCount;
           }
+      }
+      for (World world : Bukkit.getWorlds()) {
+          worlds.put(world, new SettlementWorld(world));
       }
       log.info("Loaded " + playerCount + " players!");
     }
@@ -119,6 +123,10 @@ public class SettlementServer implements SettlementConstants {
         return settlementsByUID.get(uid);
     }
     
+    public SettlementWorld getWorld(World world) {
+        return worlds.get(world);
+    }
+    
     /**
      * Gets a {@link java.util.Collection} of all Settlements currently loaded.
      * 
@@ -137,40 +145,40 @@ public class SettlementServer implements SettlementConstants {
         return settlementsByName.values();
     }
 
-    /**
-     * Gets a {@link Collection} of all the Settlements that have plots in a given world.
-     * <p />
-     * WARNING: This method is <b>very</b> slow if {@link ConfigurationConstants#useSettlementWorldCacheing Settlement world cacheing} is disabled
-     * and should not be used unless absolutely necessary, especially in the main thread.
-     * 
-     * @param world {@link World} to get Settlements in.
-     * @return Collection of Settlements with plots in world.
-     */
-    public Collection<Settlement> getSettlementsIn(World world) {
-        if (ConfigurationConstants.useSettlementWorldCacheing) {
-            return null;//TODO settlementsByWorld.get(world);
-        }
-        else {
-            Collection<Settlement> worldSets = new HashSet<Settlement>();
-            for (Settlement set : settlementsByUID.values()) {
-                for (Chunk chunk : set.getPlots()) {
-                    if (chunk.getWorld().equals(world)) {
-                        worldSets.add(set);
-                        break;
-                    }
-                }
-            }
-            return worldSets;
-        }
-    }
+//    /**
+//     * Gets a {@link Collection} of all the Settlements that have plots in a given world.
+//     * <p />
+//     * WARNING: This method is <b>very</b> slow if {@link ConfigurationConstants#useSettlementWorldCacheing Settlement world cacheing} is disabled
+//     * and should not be used unless absolutely necessary, especially in the main thread.
+//     * 
+//     * @param world {@link World} to get Settlements in.
+//     * @return Collection of Settlements with plots in world.
+//     */
+//    public Collection<Settlement> getSettlementsIn(World world) {
+//        if (ConfigurationConstants.useSettlementWorldCacheing) {
+//            return null;//TODO settlementsByWorld.get(world);
+//        }
+//        else {
+//            Collection<Settlement> worldSets = new HashSet<Settlement>();
+//            for (Settlement set : settlementsByUID.values()) {
+//                for (Chunk chunk : set.getPlots()) {
+//                    if (chunk.getWorld().equals(world)) {
+//                        worldSets.add(set);
+//                        break;
+//                    }
+//                }
+//            }
+//            return worldSets;
+//        }
+//    }
 
 
     public SettlementPlayer getSettlementPlayer(Player player) {
         if (player == null) {
             return null;
         }
-        if (playerMap.containsKey(player))
-            return playerMap.get(player);
+        if (players.containsKey(player))
+            return players.get(player);
         SettlementPlayer sp = new SettlementPlayer(player);
         registerPlayer(sp);
         return sp;
@@ -181,13 +189,17 @@ public class SettlementServer implements SettlementConstants {
         return getSettlementPlayer(Bukkit.getPlayer(name));
     }
     
+    public SettlementPlayer getSettlementPlayerExact(String name) {
+        return getSettlementPlayer(Bukkit.getPlayerExact(name));
+    }
+    
     public Collection<SettlementPlayer> getOnlinePlayers() {
-        return playerMap.values();
+        return players.values();
     }
     
     public void registerPlayer(SettlementPlayer player) {
         player.loadFromFile();
-        playerMap.put(player.getPlayer(), player);
+        players.put(player.getPlayer(), player);
         for (SettlementData data : player.getData()) {
             data.getSettlement().addOnlinePlayer(player);
         }
@@ -195,7 +207,7 @@ public class SettlementServer implements SettlementConstants {
     
     public void unregisterPlayer(SettlementPlayer player) {
         player.saveToFile();
-        playerMap.remove(player.getPlayer());
+        players.remove(player.getPlayer());
         for (SettlementData data : player.getData()) {
             data.getSettlement().removeOnlinePlayer(player);
         }
@@ -203,12 +215,13 @@ public class SettlementServer implements SettlementConstants {
     
     /**
      * Loads all Settlements from ./Settlement/data/settlements.dat
-     * @return 
+     * @return number of settlements loaded.
      */
     public int loadSettlements() {
         log.info("Loading Settlements...");
-        File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
+        File settlementsFile = new File(plugin.getSettlementsFolder(), "settlements.dat");
         if (!settlementsFile.exists()) {
+            settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
             try {
                 settlementsFile.createNewFile();
             } catch (IOException e) {
@@ -273,7 +286,7 @@ public class SettlementServer implements SettlementConstants {
      */
     public void saveSettlements() {
         log.info("Saving Settlements...");
-        File settlementsFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
+        File settlementsFile = new File(plugin.getSettlementsFolder(), "settlements.dat");
         if (!settlementsFile.exists()) {
             try {
                 settlementsFile.createNewFile();
@@ -291,7 +304,7 @@ public class SettlementServer implements SettlementConstants {
             return;
         }
         try {
-            dos.writeInt(FlatFileIO.FILE_FORMAT_VERSION);
+            dos.writeInt(FlatFileIO.SETTLEMENT_FILE_VERSION);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -311,6 +324,15 @@ public class SettlementServer implements SettlementConstants {
                     e.printStackTrace();
                 }
             }
+        }
+        try {
+            dos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        File oldFile = new File(plugin.getSavedDataFolder(), "settlements.dat");
+        if (oldFile.exists()) {
+            oldFile.delete();
         }
     }
 

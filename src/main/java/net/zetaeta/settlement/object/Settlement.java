@@ -54,7 +54,8 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
     @ToBeSaved
     private Set<String> baseMembers = new HashSet<String>();
     @ToBeSaved
-    private Collection<Chunk> plots = new HashSet<Chunk>();
+//    private Collection<Chunk> plots = new HashSet<Chunk>();
+    private Collection<Plot> plots = new HashSet<Plot>();
     Map<World, Collection<Chunk>> worldPlots;// = new HashMap<World, Collection<Chunk>>();
     @ToBeSaved
     private Collection<String> invitations = new HashSet<String>(); // Names of players invited to the faction.
@@ -245,7 +246,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
      * 
      * @return Chunks owned by the Settlement.
      */
-    public Collection<Chunk> getPlots() {
+    public Collection<Plot> getPlots() {
         return plots;
     }
     
@@ -563,6 +564,7 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             members.remove(oldMemberName);
             baseMembers.remove(oldMemberName);
             moderators.remove(oldMemberName);
+            updateClaimablePlots();
         }
     }
     
@@ -603,7 +605,10 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             sendMessage(cause, "§c  The Settlement has used up its available claims already!");
             return false;
         }
-        plots.add(chunk);
+//        plots.add(chunk);
+        Plot plot = server.getWorld(chunk.getWorld()).getPlot(chunk);
+        plots.add(plot);
+        plot.setOwnerSettlement(this);
         broadcastSettlementMessage(StringUtil.concatString("§a  ", cause.getName(), " claimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
@@ -616,14 +621,16 @@ public class Settlement implements SettlementConstants, Comparable<Settlement> {
             SettlementMessenger.sendSettlementMessage(cause, "§a  This plot does not belong to you!");
             return false;
         }
-        plots.remove(chunk);
+        Plot plot = server.getWorld(chunk.getWorld()).getPlot(chunk);
+        plots.remove(plot);
+        plot.setOwnerSettlement(WILDERNESS);
         server.clearFromChunkCache(chunk);
         broadcastSettlementMessage(StringUtil.concatString("§a  ", cause.getName(), " unclaimed land at X:", chunk.getX(), ", Z:", chunk.getZ()));
         return true;
     }
     
     public boolean addChunk(Chunk chunk) {
-        plots.add(chunk);
+        plots.add(server.getWorld(chunk.getWorld()).getPlot(chunk));
         if (ConfigurationConstants.useSettlementWorldCacheing) {
         }
         return true;

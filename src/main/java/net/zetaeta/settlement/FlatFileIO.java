@@ -9,9 +9,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
+import net.zetaeta.settlement.object.ChunkCoordinate;
+import net.zetaeta.settlement.object.Plot;
 import net.zetaeta.settlement.object.Settlement;
 import net.zetaeta.settlement.object.SettlementData;
 import net.zetaeta.settlement.object.SettlementPlayer;
+import net.zetaeta.settlement.object.SettlementWorld;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -19,9 +22,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 public final class FlatFileIO implements SettlementConstants {
-    static Map<World, Collection<Chunk>> reusableWorldPlots;
+    static Map<World, Collection<ChunkCoordinate>> reusableWorldPlots;
     
-    public static final int FILE_FORMAT_VERSION = 0;
+    public static final int SETTLEMENT_FILE_VERSION = 0;
+    public static final int PLAYER_FILE_VERSION = 0;
+    public static final int PLOT_FILE_VERSION = 0;
     
     public static void saveSettlementV0_0(Settlement set, DataOutputStream dos) throws IOException {
         dos.writeInt(set.getUid());
@@ -66,56 +71,31 @@ public final class FlatFileIO implements SettlementConstants {
         else {
             dos.writeChar('|');
         }
-        //if (ConfigurationConstants.useSettlementWorldCacheing) {// && set.worldPlots != null) {
-//            if (set.worldPlots.size() > 0) {
-//                dos.writeChar('{');
-//                for (World wrld : set.worldPlots.keySet()) {
-//                    Collection<Chunk> chunks = set.worldPlots.get(wrld);
-//                    if (chunks.size() > 0) {
-//                        dos.writeChar('{');
-//                        dos.writeLong(wrld.getUID().getMostSignificantBits());
-//                        dos.writeLong(wrld.getUID().getLeastSignificantBits());
-//                        dos.writeChar(':');
-//                        for (Chunk ch : chunks) {
-//                            dos.writeChar(',');
-//                            dos.writeInt(ch.getX());
-//                            dos.writeInt(ch.getZ());
-//                        }
-//                        dos.writeChar('}');
-//                        dos.writeChar(';');
-//                    }
-//                    else {
-//                        dos.writeChar('|');
-//                    }
-//                }
-//                dos.writeChar('}');
-//            }
-//            else {
-//                dos.writeChar('|');
-//            }
-        /*} else*/ {
+        {
             if (set.getPlots().size() > 0) {
                 if (reusableWorldPlots == null) {
-                    reusableWorldPlots = new HashMap<World, Collection<Chunk>>();
+                    reusableWorldPlots = new HashMap<World, Collection<ChunkCoordinate>>();
                 }
-                for (Chunk ch : set.getPlots()) {
-                    if (reusableWorldPlots.get(ch.getWorld()) == null) {
-                        reusableWorldPlots.put(ch.getWorld(), new HashSet<Chunk>());
+                for (Plot p : set.getPlots()) {
+                    World w = p.getWorld().getWorld();
+                    ChunkCoordinate cc = p.getCoordinates();
+                    if (reusableWorldPlots.get(w) == null) {
+                        reusableWorldPlots.put(w, new HashSet<ChunkCoordinate>());
                     }
-                    reusableWorldPlots.get(ch.getWorld()).add(ch);
+                    reusableWorldPlots.get(w).add(cc);
                 }
                 dos.writeChar('{');
                 for (World wrld : reusableWorldPlots.keySet()) {
-                    Collection<Chunk> chunks = reusableWorldPlots.get(wrld);
+                    Collection<ChunkCoordinate> chunks = reusableWorldPlots.get(wrld);
                     if (chunks.size() > 0) {
                         dos.writeChar('{');
                         dos.writeLong(wrld.getUID().getMostSignificantBits());
                         dos.writeLong(wrld.getUID().getLeastSignificantBits());
                         dos.writeChar(':');
-                        for (Chunk ch : chunks) {
+                        for (ChunkCoordinate ch : chunks) {
                             dos.writeChar(',');
-                            dos.writeInt(ch.getX());
-                            dos.writeInt(ch.getZ());
+                            dos.writeInt(ch.x);
+                            dos.writeInt(ch.z);
                         }
                         dos.writeChar('}');
                         dos.writeChar(';');
@@ -206,8 +186,12 @@ public final class FlatFileIO implements SettlementConstants {
         return set;
     }
     
+    
+    
+    
+    
     public static void savePlayerV0_0(SettlementPlayer sPlayer, DataOutputStream dos) throws IOException {
-        dos.writeInt(FILE_FORMAT_VERSION); // Save format version
+        dos.writeInt(PLAYER_FILE_VERSION); // Save format version
         dos.writeLong(System.currentTimeMillis());
         dos.writeChar('{');
         for (SettlementData data : sPlayer.getData()) {
@@ -265,5 +249,35 @@ public final class FlatFileIO implements SettlementConstants {
             log.warning("Player " + sPlayer.getName() + " had an invalid rank in " + set.getName());
             return null;
         }
+    }
+    
+    public static void savePlotV0_0(Plot plot, DataOutputStream dos) throws IOException {
+        ChunkCoordinate cc = plot.getCoordinates();
+        UUID uid = plot.getWorld().getWorld().getUID();
+        dos.writeLong(uid.getMostSignificantBits());
+        dos.writeLong(uid.getLeastSignificantBits());
+        dos.writeInt(cc.x);
+        dos.writeInt(cc.z);
+        dos.writeUTF(plot.getOwnerPlayer().getName());
+        dos.writeInt(plot.getOwnerSettlement().getUid());
+    }
+    
+    public static Plot loadPlotV0_0(DataInputStream dis) throws IOException {
+        long uid1 = dis.readLong();
+        long uid2 = dis.readLong();
+        UUID uid = new UUID(uid1, uid2);
+        ChunkCoordinate cc = new ChunkCoordinate(dis.readInt(), dis.readInt());
+        String ownerName = dis.readUTF();
+        int setUid = dis.readInt();
+        World world = Bukkit.getWorld(uid);
+        SettlementWorld sWorld = server.getWorld(world);
+        Settlement settlement = server.getSettlement(setUid);
+        if (sWorld == null || settlement == null) {
+            return null;
+        }
+        Plot plot = new Plot(sWorld, cc);
+        plot.setOwnerPlayer(ownerName);
+        plot.setOwnerSettlement(settlement);
+        return plot;
     }
 }
